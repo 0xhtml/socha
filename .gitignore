@@ -24,6 +24,7 @@ hs_err_pid*
 
 .gradle
 /build/
+/doc/
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -92,3 +93,5 @@ local.properties
 .cache-main
 .scala_dependencies
 .worksheet
+.classpath
+.project
