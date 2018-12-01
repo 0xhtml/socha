@@ -1,15 +1,14 @@
 package sc.player2019;
 
-import java.io.File;
-
+import jargs.gnu.CmdLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import jargs.gnu.CmdLineParser;
-import sc.player2019.logic.AlphaBeta;
+import sc.player2019.logic.Logic;
 import sc.plugin2019.AbstractClient;
 import sc.plugin2019.IGameHandler;
 import sc.shared.SharedConfiguration;
+
+import java.io.File;
 
 /**
  * Hauptklasse des Clients, die ueber Konsolenargumente gesteuert werden kann.
@@ -23,7 +22,7 @@ public class Starter extends AbstractClient {
     super(host, port);
 
     // Strategie zuweisen
-    IGameHandler logic = new AlphaBeta(this);
+    IGameHandler logic = new Logic(this);
     setHandler(logic);
 
     // einem Spiel beitreten
