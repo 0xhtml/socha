@@ -31,6 +31,8 @@ public class AlphaBeta implements IGameHandler {
 
 	private boolean LOG = true;
 	private boolean LOG_EVALUATION = true;
+	private boolean LOG_MOVES = true;
+	private boolean LOG_TIME = true;
 	
 	public AlphaBeta(Starter client) {
 		this.client = client;
@@ -72,7 +74,6 @@ public class AlphaBeta implements IGameHandler {
 					alpha = value;
 					foundPV = true;
 					if (depth == this.depth) {
-						System.out.println("Found new best move.");
 						bestMove = new Move(move.x, move.y, move.direction);
 					}
 				}
@@ -108,7 +109,7 @@ public class AlphaBeta implements IGameHandler {
 		out += boardRater.evaluate(boardRaterAtStart, currentPlayer);
 
 		if (LOG && LOG_EVALUATION) {
-			System.out.println(boardRater.toString());
+			System.out.println(boardRater.toString(boardRaterAtStart));
 		}
 
 		return out;
@@ -153,7 +154,12 @@ public class AlphaBeta implements IGameHandler {
 	@Override
 	public void onRequestAction() {
 		System.out.println("\nStarting calculation.");
-		long startMillis = System.currentTimeMillis();
+
+		long startMillis = 0;
+
+		if (LOG && LOG_TIME) {
+			startMillis = System.currentTimeMillis();
+		}
 		
 		boardRaterAtStart = new BoardRater(gameState.getBoard());
 		
@@ -162,11 +168,13 @@ public class AlphaBeta implements IGameHandler {
 		alphaBeta(gameState, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		
 		sendAction(bestMove);
-		
-		long endMillis = System.currentTimeMillis();
-		long millis = endMillis - startMillis;
-		System.out.println("countCalculatedMoves: "+countCalculatedMoves);
-		System.out.println("Calculation took " + millis + "ms.");
+
+		if (LOG && LOG_TIME) {
+			long endMillis = System.currentTimeMillis();
+			long calculationTime = endMillis - startMillis;
+			System.out.println("countCalculatedMoves: " + countCalculatedMoves);
+			System.out.println("calculationTime " + calculationTime + "ms");
+		}
 	}
 
 	@Override

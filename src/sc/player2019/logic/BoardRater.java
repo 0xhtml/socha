@@ -21,11 +21,16 @@ public class BoardRater {
 	}
 	
 	public int evaluate(BoardRater boardRater, PlayerColor currentPlayerColor) {
+		int mySwarmSizeDiff;
+		int opponentSwarmSizeDiff;
 		if (currentPlayerColor == PlayerColor.RED) {
-			return redSwarmSize - blueSwarmSize;
+			mySwarmSizeDiff = redSwarmSize - boardRater.getRedSwarmSize();
+			opponentSwarmSizeDiff = blueSwarmSize - boardRater.getBlueSwarmSize();
 		} else {
-			return blueSwarmSize - redSwarmSize;
+			mySwarmSizeDiff = blueSwarmSize - boardRater.getBlueSwarmSize();
+			opponentSwarmSizeDiff = redSwarmSize - boardRater.getRedSwarmSize();
 		}
+		return mySwarmSizeDiff - opponentSwarmSizeDiff;
 	}
 	
 	private int getDistanceBetweenFarestPiranhas(Board board, PlayerColor playerColor) {
@@ -52,12 +57,28 @@ public class BoardRater {
 		
 		return distance;
 	}
-	
-	public String toString() {
-		String out = "RedSwarmSize: " + redSwarmSize + "\n";
-		out += "BlueSwarmSize: " + blueSwarmSize + "\n";
-		out += "RedDistance: " + redDistanceBetweenFarestPiranhas + "\n";
-		out += "BlueDistance: " + blueDistanceBetweenFarestPiranhas + "\n";
+
+	public int getRedSwarmSize() {
+		return redSwarmSize;
+	}
+
+	public int getBlueSwarmSize() {
+		return blueSwarmSize;
+	}
+
+	public int getRedDistanceBetweenFarestPiranhas() {
+		return redDistanceBetweenFarestPiranhas;
+	}
+
+	public int getBlueDistanceBetweenFarestPiranhas() {
+		return blueDistanceBetweenFarestPiranhas;
+	}
+
+	public String toString(BoardRater boardRater) {
+		String out = "RedSwarmSize: " + boardRater.getRedSwarmSize() + "->" + redSwarmSize + "\n";
+		out += "BlueSwarmSize: " + boardRater.getBlueSwarmSize() + "->" + blueSwarmSize + "\n";
+		out += "RedDistance: " + boardRater.getRedDistanceBetweenFarestPiranhas() + "->" + redDistanceBetweenFarestPiranhas + "\n";
+		out += "BlueDistance: " + boardRater.getBlueDistanceBetweenFarestPiranhas() + "->" + blueDistanceBetweenFarestPiranhas + "\n";
 		return out;
 	}
 	
