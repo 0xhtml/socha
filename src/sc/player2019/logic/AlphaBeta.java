@@ -33,27 +33,27 @@ public class AlphaBeta implements IGameHandler {
 	private boolean LOG_EVALUATION = true;
 	private boolean LOG_MOVES = true;
 	private boolean LOG_TIME = true;
-	
+
 	public AlphaBeta(Starter client) {
 		this.client = client;
 	}
 
 	private int alphaBeta(GameState gameState, int depth, int alpha, int beta) {
-		
+
 		countCalculatedMoves++;
-		
+
 		boolean foundPV = false;
-		
+
 		if (depth <= 0 || endOfGame(gameState)) {
 			return evaluate(gameState);
 		}
-		
+
 		ArrayList<Move> moves = GameRuleLogic.getPossibleMoves(gameState);
 		if (moves.size() == 0) {
 			return evaluate(gameState);
 		}
 		//moves = sort(moves, gameState);
-		
+
 		for (Move move : moves) {
 			try {
 				GameState clonedGameState = gameState.clone();
@@ -81,13 +81,13 @@ public class AlphaBeta implements IGameHandler {
 				System.out.println("Error!");
 			}
 		}
-		
+
 		return alpha;
 	}
-	
-	private int evaluate(GameState gameState) {		
+
+	private int evaluate(GameState gameState) {
 		int out = 0;
-		
+
 		for (int i = 0; i < Constants.BOARD_SIZE; i++) {
 			for (int j = 0; j < Constants.BOARD_SIZE; j++) {
 				Field field = gameState.getField(i, j);
@@ -104,7 +104,7 @@ public class AlphaBeta implements IGameHandler {
 				}
 			}
 		}
-		
+
 		BoardRater boardRater = new BoardRater(gameState.getBoard());
 		out += boardRater.evaluate(boardRaterAtStart, currentPlayer);
 
@@ -114,15 +114,15 @@ public class AlphaBeta implements IGameHandler {
 
 		return out;
 	}
-	
+
 	private ArrayList<Move> sort(ArrayList<Move> moves, GameState gameState) {
 		ArrayList<Move> sortedMoves = new ArrayList<>();
-		
+
 		for (Move move : moves) {
 			FieldState state = gameState.getField(move.x, move.y).getState();
-			
+
 			boolean alone = true;
-			
+
 			for (int x = -1; x <= 1; x++) {
 				for (int y = -1; y <= 1; y++) {
 					if (move.x + x >= 0 && move.y + y >= 0 && move.x + x < Constants.BOARD_SIZE && move.y + y < Constants.BOARD_SIZE) {
@@ -136,21 +136,21 @@ public class AlphaBeta implements IGameHandler {
 					break;
 				}
 			}
-			
+
 			if (alone) {
 				sortedMoves.add(0, move);
 			} else {
 				sortedMoves.add(move);
 			}
 		}
-		
+
 		return sortedMoves;
 	}
-	
+
 	private boolean endOfGame(GameState gameState) {
 		return gameState.getTurn() >= Constants.ROUND_LIMIT * 2 || GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getCurrentPlayerColor())  || GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getOtherPlayerColor());
 	}
-	
+
 	@Override
 	public void onRequestAction() {
 		System.out.println("\nStarting calculation.");
@@ -160,13 +160,13 @@ public class AlphaBeta implements IGameHandler {
 		if (LOG && LOG_TIME) {
 			startMillis = System.currentTimeMillis();
 		}
-		
+
 		boardRaterAtStart = new BoardRater(gameState.getBoard());
-		
+
 		bestMove = GameRuleLogic.getPossibleMoves(gameState).get(0);
-		
+
 		alphaBeta(gameState, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
-		
+
 		sendAction(bestMove);
 
 		if (LOG && LOG_TIME) {
@@ -187,7 +187,7 @@ public class AlphaBeta implements IGameHandler {
 	public void onUpdate(Player currentPlayer, Player otherPlayer) {
 		this.currentPlayer = currentPlayer.getColor();
 	}
-	
+
 	@Override
 	public void sendAction(Move move) {
 		client.sendMove(move);
