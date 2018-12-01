@@ -28,8 +28,9 @@ public class AlphaBeta implements IGameHandler {
 	private PlayerColor currentPlayer;
 	private int countCalculatedMoves = 0;
 	private BoardRater boardRaterAtStart;
-	
-	private static final Logger log = LoggerFactory.getLogger(AlphaBeta.class);
+
+	private boolean LOG = true;
+	private boolean LOG_EVALUATION = true;
 	
 	public AlphaBeta(Starter client) {
 		this.client = client;
@@ -71,12 +72,12 @@ public class AlphaBeta implements IGameHandler {
 					alpha = value;
 					foundPV = true;
 					if (depth == this.depth) {
-						log.info("Found new best move.");
+						System.out.println("Found new best move.");
 						bestMove = new Move(move.x, move.y, move.direction);
 					}
 				}
 			} catch (InvalidGameStateException | InvalidMoveException e) {
-				log.info("Error!");
+				System.out.println("Error!");
 			}
 		}
 		
@@ -97,7 +98,7 @@ public class AlphaBeta implements IGameHandler {
 				if (j2 >= Constants.BOARD_SIZE / 2) {
 					j2 = Constants.BOARD_SIZE - j - 1;
 				}
-				if(field.getState().toString() == currentPlayer.toString()) {
+				if(field.getState().toString().equals(currentPlayer.toString())) {
 					out += i2 + j2;
 				}
 			}
@@ -105,7 +106,11 @@ public class AlphaBeta implements IGameHandler {
 		
 		BoardRater boardRater = new BoardRater(gameState.getBoard());
 		out += boardRater.evaluate(boardRaterAtStart, currentPlayer);
-		log.info(boardRater.toString());
+
+		if (LOG && LOG_EVALUATION) {
+			System.out.println(boardRater.toString());
+		}
+
 		return out;
 	}
 	
@@ -147,8 +152,7 @@ public class AlphaBeta implements IGameHandler {
 	
 	@Override
 	public void onRequestAction() {
-		log.info("");
-		log.info("Starting calculation.");
+		System.out.println("\nStarting calculation.");
 		long startMillis = System.currentTimeMillis();
 		
 		boardRaterAtStart = new BoardRater(gameState.getBoard());
@@ -161,8 +165,8 @@ public class AlphaBeta implements IGameHandler {
 		
 		long endMillis = System.currentTimeMillis();
 		long millis = endMillis - startMillis;
-		log.info("countCalculatedMoves: "+countCalculatedMoves);
-		log.info("Calculation took " + millis + "ms.");
+		System.out.println("countCalculatedMoves: "+countCalculatedMoves);
+		System.out.println("Calculation took " + millis + "ms.");
 	}
 
 	@Override

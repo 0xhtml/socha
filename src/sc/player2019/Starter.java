@@ -3,7 +3,7 @@ package sc.player2019;
 import jargs.gnu.CmdLineParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sc.player2019.logic.Logic;
+import sc.player2019.logic.AlphaBeta;
 import sc.plugin2019.AbstractClient;
 import sc.plugin2019.IGameHandler;
 import sc.shared.SharedConfiguration;
@@ -22,7 +22,7 @@ public class Starter extends AbstractClient {
     super(host, port);
 
     // Strategie zuweisen
-    IGameHandler logic = new Logic(this);
+    IGameHandler logic = new AlphaBeta(this);
     setHandler(logic);
 
     // einem Spiel beitreten

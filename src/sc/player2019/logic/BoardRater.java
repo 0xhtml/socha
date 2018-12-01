@@ -19,14 +19,6 @@ public class BoardRater {
 		redDistanceBetweenFarestPiranhas = getDistanceBetweenFarestPiranhas(board, PlayerColor.RED);
 		blueDistanceBetweenFarestPiranhas = getDistanceBetweenFarestPiranhas(board, PlayerColor.BLUE);
 	}
-
-	public int getRedSwarmSize() {
-		return redSwarmSize;
-	}
-
-	public int getBlueSwarmSize() {
-		return blueSwarmSize;
-	}
 	
 	public int evaluate(BoardRater boardRater, PlayerColor currentPlayerColor) {
 		if (currentPlayerColor == PlayerColor.RED) {
