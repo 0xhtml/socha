@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import sc.framework.plugins.Player;
 import sc.player2019.Starter;
+import sc.plugin2019.Field;
 import sc.plugin2019.FieldState;
 import sc.plugin2019.GameState;
 import sc.plugin2019.IGameHandler;
@@ -25,54 +26,18 @@ public class AlphaBeta implements IGameHandler {
 	private Starter client;
 	private int depth = 4;
 	private PlayerColor currentPlayer;
+	private int countCalculatedMoves = 0;
+	private BoardRater boardRaterAtStart;
 	
 	private static final Logger log = LoggerFactory.getLogger(AlphaBeta.class);
 	
 	public AlphaBeta(Starter client) {
 		this.client = client;
-		System.out.println("");
-		System.out.println("                                                   ,/");
-		System.out.println("                                                  //");
-		System.out.println("                                                ,//");
-		System.out.println("                                    ___   /|   |//");
-		System.out.println("                                `__/\\_ --(/|___/-/");
-		System.out.println("                             \\|\\_-\\___ __-_`- /-/ \\.");
-		System.out.println("                            |\\_-___,-\\_____--/_)' ) \\");
-		System.out.println("                             \\ -_ /     __ \\( `( __`\\|");
-		System.out.println("                             `\\__|      |\\)\\ ) /(/|");
-		System.out.println("     ,._____.,            ',--//-|      \\  |  '   /");
-		System.out.println("    /     __. \\,          / /,---|       \\       /");
-		System.out.println("   / /    _. \\  \\        `/`_/ _,'        |     |");
-		System.out.println("  |  | ( (  \\   |      ,/\\'__/'/          |     |");
-		System.out.println("  |  \\  \\`--, `_/_------______/           \\(   )/");
-		System.out.println("  | | \\  \\_. \\,                            \\___/\\");
-		System.out.println("  | |  \\_   \\  \\                                 \\");
-		System.out.println("  \\ \\    \\_ \\   \\   /                             \\");
-		System.out.println("   \\ \\  \\._  \\__ \\_|       |                       \\");
-		System.out.println("    \\ \\___  \\      \\       |                        \\");
-		System.out.println("     \\__ \\__ \\  \\_ |       \\                         |");
-		System.out.println("     |  \\_____ \\  ____      |                        |");
-		System.out.println("     | \\  \\__ ---' .__\\     |        |               |");
-		System.out.println("     \\  \\__ ---   /   )     |        \\              /");
-		System.out.println("      \\   \\____/ / ()(      \\          `---_       /|");
-		System.out.println("       \\__________/(,--__    \\_________.    |    ./ |");
-		System.out.println("         |     \\ \\  `---_\\--,           \\   \\_,./   |");
-		System.out.println("         |      \\  \\_ ` \\    /`---_______-\\   \\\\    /");
-		System.out.println("          \\      \\.___,`|   /              \\   \\\\   \\");
-		System.out.println("           \\     |  \\_ \\|   \\              (   |:    |");
-		System.out.println("            \\    \\      \\    |             /  / |    ;");
-		System.out.println("             \\    \\      \\    \\          ( `_'   \\  |");
-		System.out.println("              \\.   \\      \\.   \\          `__/   |  |");
-		System.out.println("                \\   \\       \\.  \\                |  |");
-		System.out.println("                 \\   \\        \\  \\               (  )");
-		System.out.println("                  \\   |        \\  |              |  |");
-		System.out.println("                   |  \\         \\ \\              I  `");
-		System.out.println("                   ( __;        ( _;            ('-_';");
-		System.out.println("                   |___\\        \\___:            \\___:");
-		System.out.println("                            Finn Steffens");
 	}
 
-	private float alphaBeta(GameState gameState, int depth, float alpha, float beta) {
+	private int alphaBeta(GameState gameState, int depth, int alpha, int beta) {
+		
+		countCalculatedMoves++;
 		
 		boolean foundPV = false;
 		
@@ -84,13 +49,13 @@ public class AlphaBeta implements IGameHandler {
 		if (moves.size() == 0) {
 			return evaluate(gameState);
 		}
-		moves = sort(moves, gameState);
+		//moves = sort(moves, gameState);
 		
 		for (Move move : moves) {
 			try {
 				GameState clonedGameState = gameState.clone();
 				move.perform(clonedGameState);
-				float value;
+				int value;
 				if (foundPV) {
 					value = -alphaBeta(clonedGameState, depth - 1, -alpha - 1, -alpha);
 					if (value > alpha && value < beta) {
@@ -118,14 +83,30 @@ public class AlphaBeta implements IGameHandler {
 		return alpha;
 	}
 	
-	private float evaluate(GameState gameState) {
-		float currentPlayerGreatestSwarmSize = GameRuleLogic.greatestSwarmSize(gameState.getBoard(), currentPlayer);
-		float otherPlayerGreatestSwarmSize   = GameRuleLogic.greatestSwarmSize(gameState.getBoard(), currentPlayer.opponent());
+	private int evaluate(GameState gameState) {		
+		int out = 0;
 		
-		float currentPlayerFieldsCount = GameRuleLogic.getOwnFields(gameState.getBoard(), currentPlayer).size();
-		float otherPlayerFieldsCount   = GameRuleLogic.getOwnFields(gameState.getBoard(), currentPlayer.opponent()).size();
+		for (int i = 0; i < Constants.BOARD_SIZE; i++) {
+			for (int j = 0; j < Constants.BOARD_SIZE; j++) {
+				Field field = gameState.getField(i, j);
+				int i2 = i;
+				int j2 = j;
+				if (i2 >= Constants.BOARD_SIZE / 2) {
+					i2 = Constants.BOARD_SIZE - i - 1;
+				}
+				if (j2 >= Constants.BOARD_SIZE / 2) {
+					j2 = Constants.BOARD_SIZE - j - 1;
+				}
+				if(field.getState().toString() == currentPlayer.toString()) {
+					out += i2 + j2;
+				}
+			}
+		}
 		
-		return (currentPlayerGreatestSwarmSize / currentPlayerFieldsCount) - (otherPlayerGreatestSwarmSize / otherPlayerFieldsCount);
+		BoardRater boardRater = new BoardRater(gameState.getBoard());
+		out += boardRater.evaluate(boardRaterAtStart, currentPlayer);
+		log.info(boardRater.toString());
+		return out;
 	}
 	
 	private ArrayList<Move> sort(ArrayList<Move> moves, GameState gameState) {
@@ -166,19 +147,22 @@ public class AlphaBeta implements IGameHandler {
 	
 	@Override
 	public void onRequestAction() {
-		bestMove = GameRuleLogic.getPossibleMoves(gameState).get(0);
-		
 		log.info("");
 		log.info("Starting calculation.");
 		long startMillis = System.currentTimeMillis();
 		
-		alphaBeta(gameState, depth, -Float.MAX_VALUE, Float.MAX_VALUE);
-
-		long endMillis = System.currentTimeMillis();
-		long millis = endMillis - startMillis;
-		log.info("Calculation took " + millis + "ms.");
+		boardRaterAtStart = new BoardRater(gameState.getBoard());
+		
+		bestMove = GameRuleLogic.getPossibleMoves(gameState).get(0);
+		
+		alphaBeta(gameState, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		
 		sendAction(bestMove);
+		
+		long endMillis = System.currentTimeMillis();
+		long millis = endMillis - startMillis;
+		log.info("countCalculatedMoves: "+countCalculatedMoves);
+		log.info("Calculation took " + millis + "ms.");
 	}
 
 	@Override
