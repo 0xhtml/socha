@@ -86,8 +86,8 @@ public class AlphaBeta implements IGameHandler {
 	}
 
 	private int evaluate(GameState gameState) {
-		int out = 0;
 
+		int positionOut = 0;
 		for (int i = 0; i < Constants.BOARD_SIZE; i++) {
 			for (int j = 0; j < Constants.BOARD_SIZE; j++) {
 				Field field = gameState.getField(i, j);
@@ -100,19 +100,21 @@ public class AlphaBeta implements IGameHandler {
 					j2 = Constants.BOARD_SIZE - j - 1;
 				}
 				if(field.getState().toString().equals(currentPlayer.toString())) {
-					out += i2 + j2;
+					positionOut += (i2 + j2) * 2;
 				}
 			}
 		}
 
 		BoardRater boardRater = new BoardRater(gameState.getBoard());
-		out += boardRater.evaluate(boardRaterAtStart, currentPlayer);
+		int raterOut = boardRater.evaluate(boardRaterAtStart, currentPlayer);
 
 		if (LOG && LOG_EVALUATION) {
 			System.out.println(boardRater.toString(boardRaterAtStart));
+			System.out.println("BoardRater.evaluate: " + raterOut);
+			System.out.println("PositionOut: " + positionOut);
 		}
 
-		return out;
+		return positionOut + raterOut;
 	}
 
 	private ArrayList<Move> sort(ArrayList<Move> moves, GameState gameState) {
