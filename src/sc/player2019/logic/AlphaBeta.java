@@ -2,9 +2,6 @@ package sc.player2019.logic;
 
 import java.util.ArrayList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import sc.framework.plugins.Player;
 import sc.player2019.Starter;
 import sc.plugin2019.Field;
