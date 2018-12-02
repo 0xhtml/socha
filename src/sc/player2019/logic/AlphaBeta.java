@@ -4,8 +4,6 @@ import java.util.ArrayList;
 
 import sc.framework.plugins.Player;
 import sc.player2019.Starter;
-import sc.plugin2019.Field;
-import sc.plugin2019.FieldState;
 import sc.plugin2019.GameState;
 import sc.plugin2019.IGameHandler;
 import sc.plugin2019.Move;
@@ -25,10 +23,10 @@ public class AlphaBeta implements IGameHandler {
 	private PlayerColor currentPlayer;
 	private int countCalculatedMoves = 0;
 	private BoardRater boardRaterAtStart;
-
+	private String log;
+	
 	private boolean LOG = true;
 	private boolean LOG_EVALUATION = true;
-	private boolean LOG_MOVES = true;
 	private boolean LOG_TIME = true;
 
 	public AlphaBeta(Starter client) {
@@ -42,12 +40,12 @@ public class AlphaBeta implements IGameHandler {
 		boolean foundPV = false;
 
 		if (depth <= 0 || endOfGame(gameState)) {
-			return evaluate(gameState);
+			return evaluate(gameState, depth);
 		}
 
 		ArrayList<Move> moves = GameRuleLogic.getPossibleMoves(gameState);
 		if (moves.size() == 0) {
-			return evaluate(gameState);
+			return evaluate(gameState, depth);
 		}
 		//moves = sort(moves, gameState);
 
@@ -82,39 +80,16 @@ public class AlphaBeta implements IGameHandler {
 		return alpha;
 	}
 
-	private int evaluate(GameState gameState) {
-
-		int positionOut = 0;
-		for (int i = 0; i < Constants.BOARD_SIZE; i++) {
-			for (int j = 0; j < Constants.BOARD_SIZE; j++) {
-				Field field = gameState.getField(i, j);
-				int i2 = i;
-				int j2 = j;
-				if (i2 >= Constants.BOARD_SIZE / 2) {
-					i2 = Constants.BOARD_SIZE - i - 1;
-				}
-				if (j2 >= Constants.BOARD_SIZE / 2) {
-					j2 = Constants.BOARD_SIZE - j - 1;
-				}
-				if(field.getState().toString().equals(currentPlayer.toString())) {
-					positionOut += (i2 + j2) * 2;
-				}
-			}
-		}
-
+	private int evaluate(GameState gameState, int depth) {
 		BoardRater boardRater = new BoardRater(gameState.getBoard());
-		int raterOut = boardRater.evaluate(boardRaterAtStart, currentPlayer);
+		int value = boardRater.evaluate(boardRaterAtStart, currentPlayer);
 
-		if (LOG && LOG_EVALUATION) {
-			System.out.println(boardRater.toString(boardRaterAtStart));
-			System.out.println("BoardRater.evaluate: " + raterOut);
-			System.out.println("PositionOut: " + positionOut);
-		}
+		log += "Depth: " + (depth + 1) + "\n" + boardRater.toString(boardRaterAtStart) + "Evaluate: " + value + "\n\n";
 
-		return positionOut + raterOut;
+		return value;
 	}
 
-	private ArrayList<Move> sort(ArrayList<Move> moves, GameState gameState) {
+	/*private ArrayList<Move> sort(ArrayList<Move> moves, GameState gameState) {
 		ArrayList<Move> sortedMoves = new ArrayList<>();
 
 		for (Move move : moves) {
@@ -144,7 +119,7 @@ public class AlphaBeta implements IGameHandler {
 		}
 
 		return sortedMoves;
-	}
+	}*/
 
 	private boolean endOfGame(GameState gameState) {
 		return gameState.getTurn() >= Constants.ROUND_LIMIT * 2 || GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getCurrentPlayerColor())  || GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getOtherPlayerColor());
@@ -153,7 +128,9 @@ public class AlphaBeta implements IGameHandler {
 	@Override
 	public void onRequestAction() {
 		System.out.println("\nStarting calculation.");
-
+		
+		log = "";
+		
 		long startMillis = 0;
 
 		if (LOG && LOG_TIME) {
@@ -168,11 +145,15 @@ public class AlphaBeta implements IGameHandler {
 
 		sendAction(bestMove);
 
+		if (LOG && LOG_EVALUATION) {
+			System.out.println(log);
+		}
+		
 		if (LOG && LOG_TIME) {
 			long endMillis = System.currentTimeMillis();
 			long calculationTime = endMillis - startMillis;
 			System.out.println("countCalculatedMoves: " + countCalculatedMoves);
-			System.out.println("calculationTime " + calculationTime + "ms");
+			System.out.println("calculationTime: " + calculationTime + "ms");
 		}
 	}
 

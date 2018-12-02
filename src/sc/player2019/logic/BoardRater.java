@@ -12,25 +12,39 @@ public class BoardRater {
 	private int blueSwarmSize;
 	private int redDistanceBetweenFarestPiranhas;
 	private int blueDistanceBetweenFarestPiranhas;
+	private int redPiranhaPosition;
+	private int bluePiranhaPosition;
 	
 	public BoardRater(Board board) {
 		redSwarmSize = GameRuleLogic.greatestSwarmSize(board, PlayerColor.RED);
 		blueSwarmSize = GameRuleLogic.greatestSwarmSize(board, PlayerColor.BLUE);
 		redDistanceBetweenFarestPiranhas = getDistanceBetweenFarestPiranhas(board, PlayerColor.RED);
 		blueDistanceBetweenFarestPiranhas = getDistanceBetweenFarestPiranhas(board, PlayerColor.BLUE);
+		redPiranhaPosition = evaluatePiranhaPositions(board, PlayerColor.RED);
+		bluePiranhaPosition = evaluatePiranhaPositions(board, PlayerColor.BLUE);
 	}
 	
-	public int evaluate(BoardRater boardRater, PlayerColor currentPlayerColor) {
+	public int evaluate(BoardRater boardRater, PlayerColor playerColor) {
 		int mySwarmSizeDiff;
 		int opponentSwarmSizeDiff;
-		if (currentPlayerColor == PlayerColor.RED) {
+		int myPiranhaPositionDiff;
+		int opponentPiranhaPositionDiff;
+		if (playerColor == PlayerColor.RED) {
 			mySwarmSizeDiff = redSwarmSize - boardRater.getRedSwarmSize();
 			opponentSwarmSizeDiff = blueSwarmSize - boardRater.getBlueSwarmSize();
+			myPiranhaPositionDiff = redPiranhaPosition - boardRater.getRedPiranhaPosition();
+			opponentPiranhaPositionDiff = bluePiranhaPosition - boardRater.getBluePiranhaPosition();
 		} else {
 			mySwarmSizeDiff = blueSwarmSize - boardRater.getBlueSwarmSize();
 			opponentSwarmSizeDiff = redSwarmSize - boardRater.getRedSwarmSize();
+			myPiranhaPositionDiff = bluePiranhaPosition - boardRater.getBluePiranhaPosition();
+			opponentPiranhaPositionDiff = redPiranhaPosition - boardRater.getRedPiranhaPosition();
 		}
-		return mySwarmSizeDiff - opponentSwarmSizeDiff;
+		
+		
+		int mySwarmDiffOpponentSwarmDiffDiff = mySwarmSizeDiff - opponentSwarmSizeDiff;
+		int myPiranhaPositionDiffopponentPiranhaPositonDiffDiff = myPiranhaPositionDiff - opponentPiranhaPositionDiff;
+		return myPiranhaPositionDiff * 2 + mySwarmDiffOpponentSwarmDiffDiff;
 	}
 	
 	private int getDistanceBetweenFarestPiranhas(Board board, PlayerColor playerColor) {
@@ -58,6 +72,39 @@ public class BoardRater {
 		return distance;
 	}
 
+	private int evaluatePiranhaPositions(Board board, PlayerColor playerColor) {
+		int value = 0;
+		
+		for (int i = 0; i < Constants.BOARD_SIZE; i++) {
+			for (int j = 0; j < Constants.BOARD_SIZE; j++) {
+				Field field = board.getField(i, j);
+				int i2 = i;
+				int j2 = j;
+				if (i2 >= Constants.BOARD_SIZE / 2) {
+					i2 = Constants.BOARD_SIZE - i - 1;
+				}
+				if (j2 >= Constants.BOARD_SIZE / 2) {
+					j2 = Constants.BOARD_SIZE - j - 1;
+				}
+				if(field.getState().toString().equals(playerColor.toString())) {
+					if (i != 0 && i != Constants.BOARD_SIZE - 1 && j != 0 && j != Constants.BOARD_SIZE - 1) {
+						value += (i2 + j2);
+					}
+				}
+			}
+		}
+		
+		return value;
+	}
+	
+	public int getRedPiranhaPosition() {
+		return redPiranhaPosition;
+	}
+
+	public int getBluePiranhaPosition() {
+		return bluePiranhaPosition;
+	}
+
 	public int getRedSwarmSize() {
 		return redSwarmSize;
 	}
@@ -75,10 +122,13 @@ public class BoardRater {
 	}
 
 	public String toString(BoardRater boardRater) {
-		String out = "RedSwarmSize: " + boardRater.getRedSwarmSize() + "->" + redSwarmSize + "\n";
+		String out = "";
+		out += "RedSwarmSize: " + boardRater.getRedSwarmSize() + "->" + redSwarmSize + "\n";
 		out += "BlueSwarmSize: " + boardRater.getBlueSwarmSize() + "->" + blueSwarmSize + "\n";
 		out += "RedDistance: " + boardRater.getRedDistanceBetweenFarestPiranhas() + "->" + redDistanceBetweenFarestPiranhas + "\n";
 		out += "BlueDistance: " + boardRater.getBlueDistanceBetweenFarestPiranhas() + "->" + blueDistanceBetweenFarestPiranhas + "\n";
+		out += "RedPiranhaPosition: " + boardRater.getRedPiranhaPosition() + "->" + redPiranhaPosition + "\n";
+		out += "BluePiranhaPosition: " + boardRater.getBluePiranhaPosition() + "->" + bluePiranhaPosition + "\n";
 		return out;
 	}
 	
