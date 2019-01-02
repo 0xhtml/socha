@@ -24,10 +24,13 @@ public class AlphaBeta implements IGameHandler {
 	private PlayerColor currentPlayer;
 	private int countCalculatedMoves = 0;
 	private BoardRater boardRaterAtStart;
-	private String log;
+	private String logEvaluationAll;
+	private String logEvaluationBest;
+	private String logEvaluationTmp;
 
 	private final boolean LOG = true;
-	private final boolean LOG_EVALUATION = true;
+	private final boolean LOG_EVALUATION_ALL = true;
+	private final boolean LOG_EVALUATION_BEST = true;
 	private final boolean LOG_BOARD = true;
 	private final boolean LOG_DEPTH = true;
 	private final boolean LOG_TIME = true;
@@ -73,6 +76,9 @@ public class AlphaBeta implements IGameHandler {
 					best = value;
 					if (depth == this.depth) {
 						bestMove = new Move(move.x, move.y, move.direction);
+						if (LOG_EVALUATION_BEST) {
+							logEvaluationBest = logEvaluationTmp;
+						}
 					}
 					if (value > alpha) {
 						alpha = value;
@@ -91,54 +97,50 @@ public class AlphaBeta implements IGameHandler {
 		BoardRater boardRater = new BoardRater(gameState.getBoard());
 		int value = boardRater.evaluate(boardRaterAtStart, currentPlayer);
 
-		if (LOG_BOARD || LOG_DEPTH || LOG_EVALUATION) {
-			log += "\n\n\n";
-		}
-
+		logEvaluationTmp = "\n\n\n";
 		if (LOG_BOARD) {
-			log += boardToString(gameState.getBoard());
+			logEvaluationTmp += boardToString(gameState.getBoard());
 		}
 		if (LOG_DEPTH) {
-			log += "Depth: " + (depth + 1) + "\n";
-			log += "Player: " + currentPlayer.toString() + "\n";
+			logEvaluationTmp += "Depth: " + (depth + 1) + "\n";
+			logEvaluationTmp += "Player: " + currentPlayer.toString() + "\n";
 		}
-		if (LOG_EVALUATION) {
-			log += boardRater.toString(boardRaterAtStart);
-			log += "Evaluate: " + value + "\n";
+		logEvaluationTmp += boardRater.toString(boardRaterAtStart);
+		logEvaluationTmp += "Evaluate: " + value + "\n";
+		if (LOG_EVALUATION_ALL) {
+			logEvaluationAll += logEvaluationTmp;
 		}
+
 		return value;
 	}
 
 	private boolean endOfGame(GameState gameState) {
-		return gameState.getTurn() >= Constants.ROUND_LIMIT * 2
-				|| GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getCurrentPlayerColor())
-				|| GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getOtherPlayerColor());
+		return gameState.getTurn() >= Constants.ROUND_LIMIT * 2 || GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getCurrentPlayerColor()) || GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getOtherPlayerColor());
 	}
 
 	@Override
 	public void onRequestAction() {
 		System.out.println("\nStarting calculation.");
-
-		log = "";
-
+		logEvaluationAll = "";
 		long startMillis = 0;
-
 		if (LOG && LOG_TIME) {
 			startMillis = System.currentTimeMillis();
 		}
 
 		boardRaterAtStart = new BoardRater(gameState.getBoard());
-
 		bestMove = GameRuleLogic.getPossibleMoves(gameState).get(0);
-
 		alphaBeta(gameState, depth, Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1);
-
 		sendAction(bestMove);
 
-		if (LOG) {
-			System.out.println(log);
+		if (LOG_EVALUATION_ALL) {
+			System.out.println(logEvaluationAll);
 		}
-
+		if (LOG_EVALUATION_ALL && LOG_EVALUATION_BEST) {
+			System.out.println("\n\n=== BEST ===");
+		}
+		if (LOG_EVALUATION_BEST) {
+			System.out.println(logEvaluationBest);
+		}
 		if (LOG && LOG_TIME) {
 			long endMillis = System.currentTimeMillis();
 			long calculationTime = endMillis - startMillis;
@@ -164,7 +166,8 @@ public class AlphaBeta implements IGameHandler {
 	}
 
 	@Override
-	public void gameEnded(GameResult gameResult, PlayerColor playerColor, String errorMessage) {}
+	public void gameEnded(GameResult gameResult, PlayerColor playerColor, String errorMessage) {
+	}
 
 	public String boardToString(Board board) {
 		String str = "";
@@ -192,22 +195,22 @@ public class AlphaBeta implements IGameHandler {
 		for (int i = Constants.BOARD_SIZE - 1; i >= 0; i--) {
 			for (int j = 0; j < Constants.BOARD_SIZE; j++) {
 				switch (board.getField(j, i).getState()) {
-					case BLUE:
-						str = str.replaceFirst("&", "B");
-						break;
-					case RED:
-						str = str.replaceFirst("&", "R");
-						break;
-					case OBSTRUCTED:
-						str = str.replaceFirst("&", "X");
-						break;
-					default:
-						str = str.replaceFirst("&", " ");
-						break;
+				case BLUE:
+					str = str.replaceFirst("&", "B");
+					break;
+				case RED:
+					str = str.replaceFirst("&", "R");
+					break;
+				case OBSTRUCTED:
+					str = str.replaceFirst("&", "X");
+					break;
+				default:
+					str = str.replaceFirst("&", " ");
+					break;
 				}
 			}
 		}
 		return str;
 	}
-	
+
 }
