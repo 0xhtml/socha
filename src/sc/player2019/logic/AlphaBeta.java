@@ -20,41 +20,31 @@ public class AlphaBeta implements IGameHandler {
 	private GameState gameState;
 	private Move bestMove;
 	private Starter client;
-	private int depth = 2;
+	private int depth = 3;
 	private PlayerColor currentPlayer;
-	private int countCalculatedMoves = 0;
 	private BoardRater boardRaterAtStart;
-	private String logEvaluationAll;
+
 	private String logEvaluationBest;
 	private String logEvaluationTmp;
 
+	private int count;
+	
 	private final boolean LOG = true;
-	private final boolean LOG_EVALUATION_ALL = true;
-	private final boolean LOG_EVALUATION_BEST = true;
-	private final boolean LOG_BOARD = true;
-	private final boolean LOG_DEPTH = true;
-	private final boolean LOG_TIME = true;
 
 	public AlphaBeta(Starter client) {
 		this.client = client;
 	}
 
 	private int alphaBeta(GameState gameState, int depth, int alpha, int beta) {
-
-		countCalculatedMoves++;
-
 		boolean foundPV = false;
 		int best = Integer.MIN_VALUE + 1;
-
+		count++;
+		
 		if (depth <= 0 || endOfGame(gameState)) {
 			return evaluate(gameState, depth);
 		}
 
 		ArrayList<Move> moves = GameRuleLogic.getPossibleMoves(gameState);
-		if (moves.size() == 0) {
-			return evaluate(gameState, depth);
-		}
-		// moves = sort(moves, gameState);
 
 		for (Move move : moves) {
 			try {
@@ -76,7 +66,7 @@ public class AlphaBeta implements IGameHandler {
 					best = value;
 					if (depth == this.depth) {
 						bestMove = new Move(move.x, move.y, move.direction);
-						if (LOG_EVALUATION_BEST) {
+						if (LOG) {
 							logEvaluationBest = logEvaluationTmp;
 						}
 					}
@@ -97,21 +87,16 @@ public class AlphaBeta implements IGameHandler {
 		BoardRater boardRater = new BoardRater(gameState.getBoard());
 		int value = boardRater.evaluate(boardRaterAtStart, currentPlayer);
 
-		logEvaluationTmp = "\n\n\n";
-		if (LOG_BOARD) {
-			logEvaluationTmp += boardToString(gameState.getBoard());
-		}
-		if (LOG_DEPTH) {
-			logEvaluationTmp += "Depth: " + (depth + 1) + "\n";
-			logEvaluationTmp += "Player: " + currentPlayer.toString() + "\n";
-		}
+		logEvaluationTmp = "\n\n";
+		logEvaluationTmp += boardToString(gameState.getBoard());
 		logEvaluationTmp += boardRater.toString(boardRaterAtStart);
-		logEvaluationTmp += "Evaluate: " + value + "\n";
-		if (LOG_EVALUATION_ALL) {
-			logEvaluationAll += logEvaluationTmp;
-		}
+		logEvaluationTmp += "Evaluate: " + value;
 
-		return value;
+		if (this.depth % 2 == 0) {
+			return value;
+		} else {
+			return -value;
+		}
 	}
 
 	private boolean endOfGame(GameState gameState) {
@@ -121,32 +106,19 @@ public class AlphaBeta implements IGameHandler {
 	@Override
 	public void onRequestAction() {
 		System.out.println("\nStarting calculation.");
-		logEvaluationAll = "";
-		long startMillis = 0;
-		if (LOG && LOG_TIME) {
-			startMillis = System.currentTimeMillis();
-		}
-
+		
+		long time = System.currentTimeMillis();
+		count = 0;
+		
 		boardRaterAtStart = new BoardRater(gameState.getBoard());
 		bestMove = GameRuleLogic.getPossibleMoves(gameState).get(0);
 		alphaBeta(gameState, depth, Integer.MIN_VALUE + 1, Integer.MAX_VALUE - 1);
 		sendAction(bestMove);
+		
+		System.out.println(logEvaluationBest);
 
-		if (LOG_EVALUATION_ALL) {
-			System.out.println(logEvaluationAll);
-		}
-		if (LOG_EVALUATION_ALL && LOG_EVALUATION_BEST) {
-			System.out.println("\n\n=== BEST ===");
-		}
-		if (LOG_EVALUATION_BEST) {
-			System.out.println(logEvaluationBest);
-		}
-		if (LOG && LOG_TIME) {
-			long endMillis = System.currentTimeMillis();
-			long calculationTime = endMillis - startMillis;
-			System.out.println("countCalculatedMoves: " + countCalculatedMoves);
-			System.out.println("calculationTime: " + calculationTime + "ms");
-		}
+		System.out.println("\nTime: " + (System.currentTimeMillis() - time) + "ms");
+		System.out.println("Count: " + count);
 	}
 
 	@Override

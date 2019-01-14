@@ -1,36 +1,71 @@
 package sc.player2019.logic;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import sc.plugin2019.Board;
 import sc.plugin2019.Field;
+import sc.plugin2019.FieldState;
 import sc.plugin2019.util.Constants;
 import sc.plugin2019.util.GameRuleLogic;
 import sc.shared.PlayerColor;
 
 public class BoardRater {
 
-	public int redSwarmSize;
-	public int blueSwarmSize;
 	public int redNotConnectedPiranhas;
 	public int blueNotConnectedPiranhas;
-	public int redPiranhaPosition;
-	public int bluePiranhaPosition;
+
+	public int redPiranhasPosition;
+	public int bluePiranhasPosition;
 
 	public BoardRater(Board board) {
-		redSwarmSize = GameRuleLogic.greatestSwarmSize(board, PlayerColor.RED);
-		blueSwarmSize = GameRuleLogic.greatestSwarmSize(board, PlayerColor.BLUE);
+		Set<Field> redNoBorderPiranhas = new HashSet<>();
+		Set<Field> blueNoBorderPiranhas = new HashSet<>();
+		int redPiranhasCount = 0;
+		int bluePiranhasCount = 0;
 
-		redNotConnectedPiranhas = GameRuleLogic.getOwnFields(board, PlayerColor.RED).size() - redSwarmSize;
-		blueNotConnectedPiranhas = GameRuleLogic.getOwnFields(board, PlayerColor.BLUE).size() - blueSwarmSize;
+		for (int x = 0; x < Constants.BOARD_SIZE; x++) {
+			for (int y = 0; y < Constants.BOARD_SIZE; y++) {
+				Field field = board.getField(x, y);
 
-		redPiranhaPosition = evaluatePiranhaPositions(board, PlayerColor.RED);
-		bluePiranhaPosition = evaluatePiranhaPositions(board, PlayerColor.BLUE);
+				if (field.getState() == FieldState.RED) {
+					redPiranhasCount++;
+				} else if (field.getState() == FieldState.BLUE) {
+					bluePiranhasCount++;
+				} else {
+					continue;
+				}
+
+				if (x == 0 || y == 0 || x == Constants.BOARD_SIZE - 1 || y == Constants.BOARD_SIZE - 1) {
+					continue;
+				}
+
+				int x2 = x;
+				int y2 = y;
+				if (x >= Constants.BOARD_SIZE / 2) {
+					x2 = Constants.BOARD_SIZE - x2 - 1;
+				}
+				if (y >= Constants.BOARD_SIZE / 2) {
+					y2 = Constants.BOARD_SIZE - y2 - 1;
+				}
+
+				if (field.getState() == FieldState.RED) {
+					redPiranhasPosition += x2 + y2;
+					redNoBorderPiranhas.add(field);
+				} else {
+					bluePiranhasPosition += x2 + y2;
+					blueNoBorderPiranhas.add(field);
+				}
+			}
+		}
+
+		int redGreatestNoBorderSwarmSize = GameRuleLogic.greatestSwarmSize(board, redNoBorderPiranhas);
+		int blueGreatestNoBorderSwarmSize = GameRuleLogic.greatestSwarmSize(board, blueNoBorderPiranhas);
+		redNotConnectedPiranhas = redPiranhasCount - redGreatestNoBorderSwarmSize;
+		blueNotConnectedPiranhas = bluePiranhasCount - blueGreatestNoBorderSwarmSize;
 	}
 
-	@SuppressWarnings("unused")
 	public int evaluate(BoardRater boardRaterAtStart, PlayerColor playerColor) {
-		int mySwarmSizeDiff;
-		int opponentSwarmSizeDiff;
-
 		int myNotConnectedPiranhasDiff;
 		int opponentNotConnectedPiranhasDiff;
 
@@ -38,84 +73,33 @@ public class BoardRater {
 		int opponentPiranhaPositionDiff;
 
 		if (playerColor == PlayerColor.RED) {
-			mySwarmSizeDiff = redSwarmSize - boardRaterAtStart.redSwarmSize;
-			opponentSwarmSizeDiff = blueSwarmSize - boardRaterAtStart.blueSwarmSize;
-
 			myNotConnectedPiranhasDiff = redNotConnectedPiranhas - boardRaterAtStart.redNotConnectedPiranhas;
 			opponentNotConnectedPiranhasDiff = blueNotConnectedPiranhas - boardRaterAtStart.blueNotConnectedPiranhas;
 
-			myPiranhaPositionDiff = redPiranhaPosition - boardRaterAtStart.redPiranhaPosition;
-			opponentPiranhaPositionDiff = bluePiranhaPosition - boardRaterAtStart.bluePiranhaPosition;
+			myPiranhaPositionDiff = redPiranhasPosition - boardRaterAtStart.redPiranhasPosition;
+			opponentPiranhaPositionDiff = bluePiranhasPosition - boardRaterAtStart.bluePiranhasPosition;
 		} else {
-			mySwarmSizeDiff = blueSwarmSize - boardRaterAtStart.blueSwarmSize;
-			opponentSwarmSizeDiff = redSwarmSize - boardRaterAtStart.redSwarmSize;
-
 			myNotConnectedPiranhasDiff = blueNotConnectedPiranhas - boardRaterAtStart.blueNotConnectedPiranhas;
 			opponentNotConnectedPiranhasDiff = redNotConnectedPiranhas - boardRaterAtStart.redNotConnectedPiranhas;
-			
-			myPiranhaPositionDiff = bluePiranhaPosition - boardRaterAtStart.bluePiranhaPosition;
-			opponentPiranhaPositionDiff = redPiranhaPosition - boardRaterAtStart.redPiranhaPosition;
+
+			myPiranhaPositionDiff = bluePiranhasPosition - boardRaterAtStart.bluePiranhasPosition;
+			opponentPiranhaPositionDiff = redPiranhasPosition - boardRaterAtStart.redPiranhasPosition;
 		}
 
-		return (-myNotConnectedPiranhasDiff * 2) + (opponentNotConnectedPiranhasDiff * 2) + (myPiranhaPositionDiff);
-	}
-
-//	private int getDistanceBetweenFarestPiranhas(Board board, PlayerColor playerColor) {
-//		int distance = 0;
-//		for (int i = 0; i < Constants.BOARD_SIZE; i++) {
-//			for (int j = 0; j < Constants.BOARD_SIZE; j++) {
-//				Field field = board.getField(i, j);
-//				if (field.getState().toString() == playerColor.toString()) {
-//					for (int i2 = 0; i2 < Constants.BOARD_SIZE; i2++) {
-//						for (int j2 = 0; j2 < Constants.BOARD_SIZE; j2++) {
-//							Field field2 = board.getField(i2, j2);
-//							if (field2.getState().toString() == playerColor.toString()) {
-//								int value = Math.abs(i - i2) + Math.abs(j - j2);
-//								if (value > distance) {
-//									distance = value;
-//								}
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
-//		return distance;
-//	}
-
-	private int evaluatePiranhaPositions(Board board, PlayerColor playerColor) {
-		int value = 0;
-
-		for (int i = 0; i < Constants.BOARD_SIZE; i++) {
-			for (int j = 0; j < Constants.BOARD_SIZE; j++) {
-				Field field = board.getField(i, j);
-				int i2 = i;
-				int j2 = j;
-				if (i2 >= Constants.BOARD_SIZE / 2) {
-					i2 = Constants.BOARD_SIZE - i - 1;
-				}
-				if (j2 >= Constants.BOARD_SIZE / 2) {
-					j2 = Constants.BOARD_SIZE - j - 1;
-				}
-				if (field.getState().toString().equals(playerColor.toString())) {
-					if (i != 0 && i != Constants.BOARD_SIZE - 1 && j != 0 && j != Constants.BOARD_SIZE - 1) {
-						value += (i2 + j2);
-					}
-				}
-			}
-		}
-
-		return value;
+		int result = 0;
+		result -= myNotConnectedPiranhasDiff * 2;
+		result += opponentNotConnectedPiranhasDiff * 2;
+		result += myPiranhaPositionDiff;
+		result -= opponentPiranhaPositionDiff * 0;
+		return result;
 	}
 
 	public String toString(BoardRater boardRaterAtStart) {
 		String out = "";
-		out += "RedSwarmSize: " + boardRaterAtStart.redSwarmSize + "»" + redSwarmSize + "\n";
-		out += "BlueSwarmSize: " + boardRaterAtStart.blueSwarmSize + "»" + blueSwarmSize + "\n";
 		out += "RedNotConnected: " + boardRaterAtStart.redNotConnectedPiranhas + "»" + redNotConnectedPiranhas + "\n";
 		out += "BlueNotConnected: " + boardRaterAtStart.blueNotConnectedPiranhas + "»" + blueNotConnectedPiranhas + "\n";
-		out += "RedPiranhaPosition: " + boardRaterAtStart.redPiranhaPosition + "»" + redPiranhaPosition + "\n";
-		out += "BluePiranhaPosition: " + boardRaterAtStart.bluePiranhaPosition + "»" + bluePiranhaPosition + "\n";
+		out += "RedPiranhaPosition: " + boardRaterAtStart.redPiranhasPosition + "»" + redPiranhasPosition + "\n";
+		out += "BluePiranhaPosition: " + boardRaterAtStart.bluePiranhasPosition + "»" + bluePiranhasPosition + "\n";
 		return out;
 	}
 
