@@ -28,8 +28,6 @@ public class AlphaBeta implements IGameHandler {
 	private String logEvaluationTmp;
 
 	private int count;
-	
-	private final boolean LOG = true;
 
 	public AlphaBeta(Starter client) {
 		this.client = client;
@@ -66,9 +64,7 @@ public class AlphaBeta implements IGameHandler {
 					best = value;
 					if (depth == this.depth) {
 						bestMove = new Move(move.x, move.y, move.direction);
-						if (LOG) {
-							logEvaluationBest = logEvaluationTmp;
-						}
+						logEvaluationBest = logEvaluationTmp;
 					}
 					if (value > alpha) {
 						alpha = value;
@@ -106,7 +102,6 @@ public class AlphaBeta implements IGameHandler {
 	@Override
 	public void onRequestAction() {
 		System.out.println("\nStarting calculation.");
-		
 		long time = System.currentTimeMillis();
 		count = 0;
 		
@@ -116,7 +111,6 @@ public class AlphaBeta implements IGameHandler {
 		sendAction(bestMove);
 		
 		System.out.println(logEvaluationBest);
-
 		System.out.println("\nTime: " + (System.currentTimeMillis() - time) + "ms");
 		System.out.println("Count: " + count);
 	}
@@ -139,6 +133,8 @@ public class AlphaBeta implements IGameHandler {
 
 	@Override
 	public void gameEnded(GameResult gameResult, PlayerColor playerColor, String errorMessage) {
+		System.out.println("\nGame ended.");
+		System.out.println(gameResult.toString());
 	}
 
 	public String boardToString(Board board) {
