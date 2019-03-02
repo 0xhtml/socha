@@ -95,9 +95,20 @@ public class NewGameRuleLogic {
 
 	private static double swarmSize(Set<Field> swarm) {
 		double result = 0;
+		boolean inMiddle = false;
+		for (Field field : swarm) {
+			if (!Constants.ignoreField(field)) {
+				inMiddle = true;
+				break;
+			}
+		}
 		for (Field field : swarm) {
 			if (Constants.ignoreField(field)) {
-				result += Constants.ignoredPiranhaSwarmCount;
+				if (inMiddle) {
+					result += Constants.mixedIgnoredPiranhaSwarmCount;
+				} else {
+					result += Constants.onlyIgnoredPiranhaSwarmCount;
+				}
 			} else {
 				result += 1;
 			}

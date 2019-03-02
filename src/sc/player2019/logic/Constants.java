@@ -8,14 +8,19 @@ import sc.plugin2019.FieldState;
 
 public final class Constants extends sc.plugin2019.util.Constants {
 
-	public static final int myNotConnectedPiranhasDiff = 2;
-	public static final int opponentNotConnectedPiranhasDiff = 6;
-	public static final int myPiranhaPositionDiff = 1;
-	public static final int opponentPiranhaPositionDiff = 0;
-	public static final int myPiranhaDistanceDiff = 1;
-	public static final int opponentPiranhaDistanceDiff = 1;
+	public static int myPiranhasCountFac = 0;    // (-) 1-16
+	public static int otherPiranhasCountFac = 3; // (+) 1-16
 	
-	public static final boolean ignoreField(Field field) {
+	public static int myNoBorderSwarmSizeFac = 3;    // (+) 0-16
+	public static int otherNoBorderSwarmSizeFac = 2; // (-) 0-16
+	
+	public static int myPiranhasPositionFac = 1;    // (+) 0-96
+	public static int otherPiranhasPositionFac = 0; // (-) 0-96
+	
+	public static int myPiranhasDistanceFac = 1;    // (-) 1-18
+	public static int otherPiranhasDistanceFac = 1; // (+) 1-18
+	
+	public static boolean ignoreField(Field field) {
 		if (field.getState() == FieldState.RED) {
 			if (field.getX() == 0 || field.getY() == Constants.BOARD_SIZE - 1) {
 				return true;
@@ -28,9 +33,10 @@ public final class Constants extends sc.plugin2019.util.Constants {
 		return false;
 	}
 	
-	public static final double ignoredPiranhaSwarmCount = 0.5;
+	public static double onlyIgnoredPiranhaSwarmCount = 0;
+	public static double mixedIgnoredPiranhaSwarmCount = 0.2;
 	
-	public static final ArrayList<ArrayList<Integer>> boardPosition = new ArrayList<>();
+	public static ArrayList<ArrayList<Integer>> boardPosition = new ArrayList<>();
 	
 	static {
 		boardPosition.add(new ArrayList<>(Arrays.asList(0,0,0,0,0,0,0,0,0,0)));
