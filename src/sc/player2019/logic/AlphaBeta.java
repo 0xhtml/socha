@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import sc.framework.plugins.Player;
 import sc.player2019.Starter;
+import sc.plugin2019.Direction;
 import sc.plugin2019.GameState;
 import sc.plugin2019.IGameHandler;
 import sc.plugin2019.Move;
@@ -22,9 +23,6 @@ public class AlphaBeta implements IGameHandler {
 	private int depth = 3;
 	private PlayerColor currentPlayer;
 	private BoardRater boardRaterAtStart;
-
-	private String logEvaluationBest;
-	private String logEvaluationTmp;
 	
 	private boolean timeout;
 	private long time;
@@ -55,6 +53,8 @@ public class AlphaBeta implements IGameHandler {
 			return evaluate(gameState, depth);
 		}
 		
+		moves = sortMoves(moves);
+		
 		for (Move move : moves) {
 			try {
 				GameState clonedGameState = gameState.clone();
@@ -75,7 +75,6 @@ public class AlphaBeta implements IGameHandler {
 					best = value;
 					if (depth == this.depth) {
 						bestMove = new Move(move.x, move.y, move.direction);
-						logEvaluationBest = logEvaluationTmp;
 					}
 					if (value > alpha) {
 						alpha = value;
@@ -96,9 +95,6 @@ public class AlphaBeta implements IGameHandler {
 	private int evaluate(GameState gameState, int depth) {
 		BoardRater boardRater = new BoardRater(gameState.getBoard());
 		int value = boardRater.evaluate(boardRaterAtStart, currentPlayer);
-
-		logEvaluationTmp = "Evaluate: " + value;
-
 		if (this.depth % 2 == 0) {
 			return value;
 		} else {
@@ -110,6 +106,43 @@ public class AlphaBeta implements IGameHandler {
 		return gameState.getRound() >= Constants.ROUND_LIMIT || GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getCurrentPlayerColor()) || GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getOtherPlayerColor());
 	}
 
+	private ArrayList<Move> sortMoves(ArrayList<Move> moves) {
+		ArrayList<Move> sortedMoves = new ArrayList<>();
+		for (Move move : moves) {
+			if (move.x < Constants.BOARD_SIZE / 2 - 1) {
+				if (move.y < Constants.BOARD_SIZE / 2 - 1) {
+					// Unten Links
+					if (move.direction == Direction.UP_RIGHT) {
+						sortedMoves.add(0, move);
+						continue;
+					}
+				} else {
+					// Oben Links
+					if (move.direction == Direction.DOWN_RIGHT) {
+						sortedMoves.add(0, move);
+						continue;
+					}
+				}
+			} else {
+				if (move.y < Constants.BOARD_SIZE / 2 - 1) {
+					// Unten Rechts
+					if (move.direction == Direction.UP_LEFT) {
+						sortedMoves.add(0, move);
+						continue;
+					}
+				} else {
+					// Oben Rechts
+					if (move.direction == Direction.DOWN_LEFT) {
+						sortedMoves.add(0, move);
+						continue;
+					}
+				}
+			}
+			sortedMoves.add(move);
+		}
+		return sortedMoves;
+	}
+	
 	@Override
 	public void onRequestAction() {
 		System.out.println("\nStarting calculation.");
@@ -118,10 +151,10 @@ public class AlphaBeta implements IGameHandler {
 		
 		boardRaterAtStart = new BoardRater(gameState.getBoard());
 		bestMove = GameRuleLogic.getPossibleMoves(gameState).get(0);
-		alphaBeta(gameState, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
+		int best = alphaBeta(gameState, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		sendAction(bestMove);
 		
-		System.out.println(logEvaluationBest);
+		System.out.println("Evaluation: " + best);
 	}
 
 	@Override

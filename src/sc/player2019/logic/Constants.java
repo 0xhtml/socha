@@ -8,17 +8,16 @@ import sc.plugin2019.FieldState;
 
 public final class Constants extends sc.plugin2019.util.Constants {
 
-	public static int myPiranhasCountFac = 0;    // (-) 1-16
-	public static int otherPiranhasCountFac = 3; // (+) 1-16
-	
-	public static int myNoBorderSwarmSizeFac = 3;    // (+) 0-16
-	public static int otherNoBorderSwarmSizeFac = 2; // (-) 0-16
+	public static int myNoBorderNotConnectedPiranhasFac = 2;    // (-) 16-0
+	public static int otherNoBorderNotConnectedPiranhasFac = 2; // (+) 16-0
 	
 	public static int myPiranhasPositionFac = 1;    // (+) 0-96
 	public static int otherPiranhasPositionFac = 0; // (-) 0-96
 	
-	public static int myPiranhasDistanceFac = 1;    // (-) 1-18
-	public static int otherPiranhasDistanceFac = 1; // (+) 1-18
+	public static int myPiranhasDistanceFac = 0;    // (-) 1-18
+	public static int otherPiranhasDistanceFac = 0; // (+) 1-18
+	
+	public static int eatUntilPiranhasCountDiff = -100;
 	
 	public static boolean ignoreField(Field field) {
 		if (field.getState() == FieldState.RED) {
@@ -34,7 +33,7 @@ public final class Constants extends sc.plugin2019.util.Constants {
 	}
 	
 	public static double onlyIgnoredPiranhaSwarmCount = 0;
-	public static double mixedIgnoredPiranhaSwarmCount = 0.2;
+	public static double mixedIgnoredPiranhaSwarmCount = 0.5;
 	
 	public static ArrayList<ArrayList<Integer>> boardPosition = new ArrayList<>();
 	

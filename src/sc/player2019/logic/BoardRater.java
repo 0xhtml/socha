@@ -90,7 +90,6 @@ public class BoardRater {
 		int otherPiranhasDistance;
 		int myPiranhasCount;
 		int otherPiranhasCount;
-		
 		int startMyPiranhasCount;
 		int startOtherPiranhasCount;
 		if (playerColor == PlayerColor.RED) {
@@ -104,7 +103,6 @@ public class BoardRater {
 			otherPiranhasDistance = bluePiranhasDistance;
 			myPiranhasCount = redPiranhasCount;
 			otherPiranhasCount = bluePiranhasCount;
-			
 			startMyPiranhasCount = boardRaterAtStart.redPiranhasCount;
 			startOtherPiranhasCount = boardRaterAtStart.bluePiranhasCount;
 		} else {
@@ -118,33 +116,23 @@ public class BoardRater {
 			otherPiranhasDistance = redPiranhasDistance;
 			myPiranhasCount = bluePiranhasCount;
 			otherPiranhasCount = redPiranhasCount;
-			
 			startMyPiranhasCount = boardRaterAtStart.bluePiranhasCount;
 			startOtherPiranhasCount = boardRaterAtStart.redPiranhasCount;
 		}
 		
 		int result = 0;
 		
-		if (mySwarmSize == myPiranhasCount) {
-			result += 1000;
-			if (playerColor == PlayerColor.RED) {
-				// TODO: Minus wenn Blau im nächsten Zug gewinnt.
-			}
-		} else if (startOtherPiranhasCount > otherPiranhasCount && startMyPiranhasCount >= startOtherPiranhasCount) {
+		if (startOtherPiranhasCount > otherPiranhasCount && Constants.eatUntilPiranhasCountDiff <= (startMyPiranhasCount - startOtherPiranhasCount)) {
 			result -= 1000;
-		} else {
-			result -= myPiranhasCount * Constants.myPiranhasCountFac;
-			result += otherPiranhasCount * Constants.otherPiranhasCountFac;
-			
-			result += myNoBorderSwarmSize * Constants.myNoBorderSwarmSizeFac;
-			result -= otherNoBorderSwarmSize * Constants.otherNoBorderSwarmSizeFac;
-			
-			result += myPiranhasPosition * Constants.myPiranhasPositionFac;
-			result -= otherPiranhasPosition * Constants.otherPiranhasPositionFac;
-			
-			result -= myPiranhasDistance * Constants.myPiranhasDistanceFac;
-			result += otherPiranhasDistance * Constants.otherPiranhasDistanceFac;
 		}
+		result -= (myPiranhasCount - myNoBorderSwarmSize) * Constants.myNoBorderNotConnectedPiranhasFac;
+		result += (otherPiranhasCount - otherNoBorderSwarmSize) * Constants.otherNoBorderNotConnectedPiranhasFac;
+		
+		result += myPiranhasPosition * Constants.myPiranhasPositionFac;
+		result -= otherPiranhasPosition * Constants.otherPiranhasPositionFac;
+		
+		result -= myPiranhasDistance * Constants.myPiranhasDistanceFac;
+		result += otherPiranhasDistance * Constants.otherPiranhasDistanceFac;
 		
 		return result;
 	}
