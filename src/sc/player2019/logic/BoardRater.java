@@ -1,5 +1,7 @@
 package sc.player2019.logic;
 
+import java.util.Set;
+
 import sc.plugin2019.Board;
 import sc.plugin2019.Field;
 import sc.plugin2019.FieldState;
@@ -8,23 +10,26 @@ import sc.shared.PlayerColor;
 
 public class BoardRater {
 
+	protected int round;
+
 	protected int redSwarmSize = 0;
 	protected int blueSwarmSize = 0;
-	
+
 	protected double redNoBorderSwarmSize = 0;
 	protected double blueNoBorderSwarmSize = 0;
 
 	protected int redPiranhasPosition = 0;
 	protected int bluePiranhasPosition = 0;
-	
-	protected int redPiranhasDistance = 0;
-	protected int bluePiranhasDistance = 0;
 
 	protected int redPiranhasCount = 0;
 	protected int bluePiranhasCount = 0;
-	
-	public BoardRater(Board board) {
-		
+
+	protected int redSwarmDistance = 0;
+	protected int blueSwarmDistance = 0;
+
+	public BoardRater(Board board, int round) {
+		this.round = round;
+
 		for (int x = 0; x < Constants.BOARD_SIZE; x++) {
 			for (int y = 0; y < Constants.BOARD_SIZE; y++) {
 				Field field = board.getField(x, y);
@@ -33,7 +38,7 @@ public class BoardRater {
 				if (field.getState() != FieldState.RED && field.getState() != FieldState.BLUE) {
 					continue;
 				}
-				
+
 				// Die Fische zählen
 				if (field.getState() == FieldState.RED) {
 					redPiranhasCount++;
@@ -41,27 +46,9 @@ public class BoardRater {
 					bluePiranhasCount++;
 				}
 
-				// Die größte Distance zwischen den Fischen ermitteln
-				for (int x2 = 0; x2 < Constants.BOARD_SIZE; x2++) {
-					for (int y2 = 0; y2 < Constants.BOARD_SIZE; y2++) {
-						Field field2 = board.getField(x2, y2);
-						
-						if (field2.getState() == field.getState()) {
-							int distanceX = Math.abs(field.getX() - field2.getX());
-							int distanceY = Math.abs(field.getY() - field2.getY());
-							int distance = distanceX + distanceY;
-							
-							if (field.getState() == FieldState.RED) {
-								if (distance > redPiranhasDistance) {
-									redPiranhasDistance = distance;
-								}
-							} else {
-								if (distance > bluePiranhasDistance) {
-									bluePiranhasDistance = distance;
-								}
-							}
-						}
-					}
+				// Überspringe, wenn Feld ignoriet werden soll
+				if (Constants.ignoreField(field)) {
+					continue;
 				}
 
 				// Die Fischposition bewerten.
@@ -72,68 +59,92 @@ public class BoardRater {
 				}
 			}
 		}
-		
+
 		redSwarmSize = GameRuleLogic.greatestSwarmSize(board, PlayerColor.RED);
 		blueSwarmSize = GameRuleLogic.greatestSwarmSize(board, PlayerColor.BLUE);
-		redNoBorderSwarmSize = NewGameRuleLogic.greatestSwarmSize(board, PlayerColor.RED);
-		blueNoBorderSwarmSize = NewGameRuleLogic.greatestSwarmSize(board, PlayerColor.BLUE);
+
+		Set<Field> redSwarm = NewGameRuleLogic.greatestSwarm(board, PlayerColor.RED);
+		Set<Field> blueSwarm = NewGameRuleLogic.greatestSwarm(board, PlayerColor.BLUE);
+		for (Field a : redSwarm) {
+			for (Field b : redSwarm) {
+				int distance = Math.abs(a.getX() - b.getX()) + Math.abs(a.getX() - b.getX());
+				if (distance > redSwarmDistance) {
+					redSwarmDistance = distance;
+				}
+			}
+		}
+		for (Field a : blueSwarm) {
+			for (Field b : blueSwarm) {
+				int distance = Math.abs(a.getX() - b.getX()) + Math.abs(a.getX() - b.getX());
+				if (distance > blueSwarmDistance) {
+					blueSwarmDistance = distance;
+				}
+			}
+		}
+
+		redNoBorderSwarmSize = NewGameRuleLogic.swarmSize(redSwarm);
+		blueNoBorderSwarmSize = NewGameRuleLogic.swarmSize(blueSwarm);
 	}
 
 	public int evaluate(BoardRater boardRaterAtStart, PlayerColor playerColor) {
-		int mySwarmSize;
-		int otherSwarmSize;
 		double myNoBorderSwarmSize;
 		double otherNoBorderSwarmSize;
+
 		int myPiranhasPosition;
 		int otherPiranhasPosition;
-		int myPiranhasDistance;
-		int otherPiranhasDistance;
+
 		int myPiranhasCount;
 		int otherPiranhasCount;
-		int startMyPiranhasCount;
+
+		int mySwarmDistance;
+		int otherSwarmDistance;
+
 		int startOtherPiranhasCount;
 		if (playerColor == PlayerColor.RED) {
-			mySwarmSize = redSwarmSize;
-			otherSwarmSize = blueSwarmSize;
 			myNoBorderSwarmSize = redNoBorderSwarmSize;
 			otherNoBorderSwarmSize = blueNoBorderSwarmSize;
+
 			myPiranhasPosition = redPiranhasPosition;
 			otherPiranhasPosition = bluePiranhasPosition;
-			myPiranhasDistance = redPiranhasDistance;
-			otherPiranhasDistance = bluePiranhasDistance;
+
 			myPiranhasCount = redPiranhasCount;
 			otherPiranhasCount = bluePiranhasCount;
-			startMyPiranhasCount = boardRaterAtStart.redPiranhasCount;
+
+			mySwarmDistance = redSwarmDistance;
+			otherSwarmDistance = blueSwarmDistance;
+
 			startOtherPiranhasCount = boardRaterAtStart.bluePiranhasCount;
 		} else {
-			mySwarmSize = blueSwarmSize;
-			otherSwarmSize = redSwarmSize;
 			myNoBorderSwarmSize = blueNoBorderSwarmSize;
 			otherNoBorderSwarmSize = redNoBorderSwarmSize;
+
 			myPiranhasPosition = bluePiranhasPosition;
 			otherPiranhasPosition = redPiranhasPosition;
-			myPiranhasDistance = bluePiranhasDistance;
-			otherPiranhasDistance = redPiranhasDistance;
+
 			myPiranhasCount = bluePiranhasCount;
 			otherPiranhasCount = redPiranhasCount;
-			startMyPiranhasCount = boardRaterAtStart.bluePiranhasCount;
+
+			mySwarmDistance = blueSwarmDistance;
+			otherSwarmDistance = redSwarmDistance;
+
 			startOtherPiranhasCount = boardRaterAtStart.redPiranhasCount;
 		}
-		
+
 		int result = 0;
-		
-		if (startOtherPiranhasCount > otherPiranhasCount && Constants.eatUntilPiranhasCountDiff <= (startMyPiranhasCount - startOtherPiranhasCount)) {
-			result -= 1000;
+
+		if (startOtherPiranhasCount > otherPiranhasCount && Constants.eatUntilPiranhasCount >= otherPiranhasCount) {
+			result -= 10000;
 		}
+
 		result -= (myPiranhasCount - myNoBorderSwarmSize) * Constants.myNoBorderNotConnectedPiranhasFac;
 		result += (otherPiranhasCount - otherNoBorderSwarmSize) * Constants.otherNoBorderNotConnectedPiranhasFac;
-		
+
 		result += myPiranhasPosition * Constants.myPiranhasPositionFac;
 		result -= otherPiranhasPosition * Constants.otherPiranhasPositionFac;
-		
-		result -= myPiranhasDistance * Constants.myPiranhasDistanceFac;
-		result += otherPiranhasDistance * Constants.otherPiranhasDistanceFac;
-		
+
+		result += mySwarmDistance * Constants.mySwarmDistanceFac;
+		result -= otherSwarmDistance * Constants.otherSwarmDistanceFac;
+
 		return result;
 	}
 

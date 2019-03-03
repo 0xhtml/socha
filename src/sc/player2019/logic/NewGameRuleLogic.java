@@ -5,27 +5,13 @@ import java.util.Set;
 
 import sc.plugin2019.Board;
 import sc.plugin2019.Field;
+import sc.plugin2019.util.GameRuleLogic;
 import sc.shared.PlayerColor;
 
 public class NewGameRuleLogic {
 
 	private NewGameRuleLogic() {
 		throw new IllegalStateException("Can't be instantiated.");
-	}
-
-	public static Set<Field> getOwnFields(Board board, PlayerColor player) {
-		Set<Field> fields = new HashSet<>();
-		int size = 0;
-		for (int i = 0; i < Constants.BOARD_SIZE && Constants.MAX_FISH > size; i++) {
-			for (int j = 0; j < Constants.BOARD_SIZE && Constants.MAX_FISH > size; j++) {
-				Field curField = board.getField(i, j);
-				if (curField.getPiranha().isPresent() && curField.getPiranha().get().equals(player)) {
-					fields.add(curField);
-					size++;
-				}
-			}
-		}
-		return fields;
 	}
 
 	private static Set<Field> getDirectNeighbour(Board board, Field f, Set<Field> parentSet) {
@@ -68,7 +54,7 @@ public class NewGameRuleLogic {
 		return swarm;
 	}
 
-	public static Set<Field> greatestSwarm(Board board, Set<Field> fieldsToCheck) {
+	private static Set<Field> greatestSwarm(Board board, Set<Field> fieldsToCheck) {
 		Set<Field> occupiedFields = new HashSet<>(fieldsToCheck);
 		Set<Field> greatestSwarm = new HashSet<>();
 		double maxSize = -1;
@@ -84,16 +70,12 @@ public class NewGameRuleLogic {
 		return greatestSwarm;
 	}
 
-	private static Set<Field> greatestSwarm(Board board, PlayerColor player) {
-		Set<Field> occupiedFields = getOwnFields(board, player);
+	public static Set<Field> greatestSwarm(Board board, PlayerColor player) {
+		Set<Field> occupiedFields = GameRuleLogic.getOwnFields(board, player);
 		return greatestSwarm(board, occupiedFields);
 	}
 
-	public static double greatestSwarmSize(Board board, PlayerColor player) {
-		return swarmSize(greatestSwarm(board, player));
-	}
-
-	private static double swarmSize(Set<Field> swarm) {
+	public static double swarmSize(Set<Field> swarm) {
 		double result = 0;
 		boolean inMiddle = false;
 		for (Field field : swarm) {

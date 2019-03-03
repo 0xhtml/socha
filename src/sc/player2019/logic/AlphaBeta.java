@@ -23,7 +23,7 @@ public class AlphaBeta implements IGameHandler {
 	private int depth = 3;
 	private PlayerColor currentPlayer;
 	private BoardRater boardRaterAtStart;
-	
+
 	private boolean timeout;
 	private long time;
 
@@ -33,16 +33,16 @@ public class AlphaBeta implements IGameHandler {
 
 	private int alphaBeta(GameState gameState, int depth, int alpha, int beta) {
 		if (System.currentTimeMillis() - time >= 1890) {
-			System.out.println("TimeoutTime: " + (System.currentTimeMillis()- time) + "ms");
+			System.out.println("TimeoutTime: " + (System.currentTimeMillis() - time) + "ms");
 			timeout = true;
 		}
 		if (timeout) {
 			return 0;
 		}
-		
+
 		boolean foundPV = false;
 		int best = Integer.MIN_VALUE;
-		
+
 		if (depth <= 0 || endOfGame(gameState)) {
 			return evaluate(gameState, depth);
 		}
@@ -52,9 +52,9 @@ public class AlphaBeta implements IGameHandler {
 		if (moves.size() == 0) {
 			return evaluate(gameState, depth);
 		}
-		
+
 		moves = sortMoves(moves);
-		
+
 		for (Move move : moves) {
 			try {
 				GameState clonedGameState = gameState.clone();
@@ -93,17 +93,19 @@ public class AlphaBeta implements IGameHandler {
 	}
 
 	private int evaluate(GameState gameState, int depth) {
-		BoardRater boardRater = new BoardRater(gameState.getBoard());
+		BoardRater boardRater = new BoardRater(gameState.getBoard(), gameState.getRound());
 		int value = boardRater.evaluate(boardRaterAtStart, currentPlayer);
-		if (this.depth % 2 == 0) {
-			return value;
-		} else {
-			return -value;
+		if ((this.depth - depth) % 2 != 0) {
+			value = -value;
 		}
+		return value;
 	}
 
 	private boolean endOfGame(GameState gameState) {
-		return gameState.getRound() >= Constants.ROUND_LIMIT || GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getCurrentPlayerColor()) || GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getOtherPlayerColor());
+		if (gameState.getTurn() >= Constants.ROUND_LIMIT * 2) {
+			return true;
+		}
+		return GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getCurrentPlayerColor()) || GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getOtherPlayerColor());
 	}
 
 	private ArrayList<Move> sortMoves(ArrayList<Move> moves) {
@@ -142,18 +144,18 @@ public class AlphaBeta implements IGameHandler {
 		}
 		return sortedMoves;
 	}
-	
+
 	@Override
 	public void onRequestAction() {
 		System.out.println("\nStarting calculation.");
 		time = System.currentTimeMillis();
 		timeout = false;
-		
-		boardRaterAtStart = new BoardRater(gameState.getBoard());
+
+		boardRaterAtStart = new BoardRater(gameState.getBoard(), gameState.getRound());
 		bestMove = GameRuleLogic.getPossibleMoves(gameState).get(0);
 		int best = alphaBeta(gameState, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		sendAction(bestMove);
-		
+
 		System.out.println("Evaluation: " + best);
 	}
 
