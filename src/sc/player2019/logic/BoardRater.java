@@ -10,8 +10,6 @@ import sc.shared.PlayerColor;
 
 public class BoardRater {
 
-	protected int round;
-
 	protected int redSwarmSize = 0;
 	protected int blueSwarmSize = 0;
 
@@ -27,9 +25,7 @@ public class BoardRater {
 	protected int redSwarmDistance = 0;
 	protected int blueSwarmDistance = 0;
 
-	public BoardRater(Board board, int round) {
-		this.round = round;
-
+	public BoardRater(Board board) {
 		for (int x = 0; x < Constants.BOARD_SIZE; x++) {
 			for (int y = 0; y < Constants.BOARD_SIZE; y++) {
 				Field field = board.getField(x, y);

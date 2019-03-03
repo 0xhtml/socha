@@ -93,7 +93,7 @@ public class AlphaBeta implements IGameHandler {
 	}
 
 	private int evaluate(GameState gameState, int depth) {
-		BoardRater boardRater = new BoardRater(gameState.getBoard(), gameState.getRound());
+		BoardRater boardRater = new BoardRater(gameState.getBoard());
 		int value = boardRater.evaluate(boardRaterAtStart, currentPlayer);
 		if ((this.depth - depth) % 2 != 0) {
 			value = -value;
@@ -151,7 +151,7 @@ public class AlphaBeta implements IGameHandler {
 		time = System.currentTimeMillis();
 		timeout = false;
 
-		boardRaterAtStart = new BoardRater(gameState.getBoard(), gameState.getRound());
+		boardRaterAtStart = new BoardRater(gameState.getBoard());
 		bestMove = GameRuleLogic.getPossibleMoves(gameState).get(0);
 		int best = alphaBeta(gameState, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
 		sendAction(bestMove);
