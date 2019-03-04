@@ -22,7 +22,6 @@ public class AlphaBeta implements IGameHandler {
 	private Starter client;
 	private int depth = 3;
 	private PlayerColor currentPlayer;
-	private BoardRater boardRaterAtStart;
 
 	private boolean timeout;
 	private long time;
@@ -31,7 +30,7 @@ public class AlphaBeta implements IGameHandler {
 		this.client = client;
 	}
 
-	private int alphaBeta(GameState gameState, int depth, int alpha, int beta) {
+	private double alphaBeta(GameState gameState, int depth, double alpha, double beta) {
 		if (System.currentTimeMillis() - time >= 1890) {
 			System.out.println("TimeoutTime: " + (System.currentTimeMillis() - time) + "ms");
 			timeout = true;
@@ -41,7 +40,7 @@ public class AlphaBeta implements IGameHandler {
 		}
 
 		boolean foundPV = false;
-		int best = Integer.MIN_VALUE;
+		double best = Double.NEGATIVE_INFINITY;
 
 		if (depth <= 0 || endOfGame(gameState)) {
 			return evaluate(gameState, depth);
@@ -59,7 +58,7 @@ public class AlphaBeta implements IGameHandler {
 			try {
 				GameState clonedGameState = gameState.clone();
 				move.perform(clonedGameState);
-				int value;
+				double value;
 				if (foundPV) {
 					value = -alphaBeta(clonedGameState, depth - 1, -alpha - 1, -alpha);
 					if (value > alpha && value < beta) {
@@ -92,9 +91,9 @@ public class AlphaBeta implements IGameHandler {
 		return best;
 	}
 
-	private int evaluate(GameState gameState, int depth) {
-		BoardRater boardRater = new BoardRater(gameState.getBoard());
-		int value = boardRater.evaluate(boardRaterAtStart, currentPlayer);
+	private double evaluate(GameState gameState, int depth) {
+		BoardRater boardRater = new BoardRater(gameState.getBoard(), currentPlayer, gameState.getTurn());
+		double value = boardRater.evaluate();
 		if ((this.depth - depth) % 2 != 0) {
 			value = -value;
 		}
@@ -148,12 +147,12 @@ public class AlphaBeta implements IGameHandler {
 	@Override
 	public void onRequestAction() {
 		System.out.println("\nStarting calculation.");
+		System.out.println("MyColor: " + currentPlayer.toString());
 		time = System.currentTimeMillis();
 		timeout = false;
 
-		boardRaterAtStart = new BoardRater(gameState.getBoard());
 		bestMove = GameRuleLogic.getPossibleMoves(gameState).get(0);
-		int best = alphaBeta(gameState, depth, Integer.MIN_VALUE, Integer.MAX_VALUE);
+		double best = alphaBeta(gameState, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
 		sendAction(bestMove);
 
 		System.out.println("Evaluation: " + best);
@@ -180,6 +179,7 @@ public class AlphaBeta implements IGameHandler {
 	public void gameEnded(GameResult gameResult, PlayerColor playerColor, String errorMessage) {
 		System.out.println("\nGame ended.");
 		System.out.println(gameResult.toString());
+		System.out.println(errorMessage);
 	}
 
 }

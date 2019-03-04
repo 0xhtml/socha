@@ -1,31 +1,34 @@
 package sc.player2019.logic;
 
-import java.util.Set;
-
 import sc.plugin2019.Board;
 import sc.plugin2019.Field;
 import sc.plugin2019.FieldState;
+import sc.plugin2019.util.Constants;
 import sc.plugin2019.util.GameRuleLogic;
 import sc.shared.PlayerColor;
 
 public class BoardRater {
 
-	protected int redSwarmSize = 0;
-	protected int blueSwarmSize = 0;
+	private int turn;
 
-	protected double redNoBorderSwarmSize = 0;
-	protected double blueNoBorderSwarmSize = 0;
+	private int myPiranhasCount = 0;
+	private int otherPiranhasCount = 0;
 
-	protected int redPiranhasPosition = 0;
-	protected int bluePiranhasPosition = 0;
+	private int myPiranhasPosition = 0;
+	private int otherPiranhasPosition = 0;
 
-	protected int redPiranhasCount = 0;
-	protected int bluePiranhasCount = 0;
+	private int myPiranhasAtBorder = 0;
+	private int otherPiranhasAtBorder = 0;
 
-	protected int redSwarmDistance = 0;
-	protected int blueSwarmDistance = 0;
+	private int myGreatestSwarmSize = 0;
+	private int otherGreatestSwarmSize = 0;
 
-	public BoardRater(Board board) {
+	private int myNotInGreatestSwarmPiranhas = 0;
+	private int otherNotInGreatestSwarmPiranhas = 0;
+
+	public BoardRater(Board board, PlayerColor playerColor, int turn) {
+		this.turn = turn;
+
 		for (int x = 0; x < Constants.BOARD_SIZE; x++) {
 			for (int y = 0; y < Constants.BOARD_SIZE; y++) {
 				Field field = board.getField(x, y);
@@ -36,111 +39,61 @@ public class BoardRater {
 				}
 
 				// Die Fische zählen
-				if (field.getState() == FieldState.RED) {
-					redPiranhasCount++;
+				if (field.getState().toString() == playerColor.toString()) {
+					myPiranhasCount++;
 				} else {
-					bluePiranhasCount++;
+					otherPiranhasCount++;
 				}
 
-				// Überspringe, wenn Feld ignoriet werden soll
-				if (Constants.ignoreField(field)) {
-					continue;
+				// Zählen der Fische am Rand
+				if (x == 0 || x == Constants.BOARD_SIZE - 1 || y == 0 || y == Constants.BOARD_SIZE - 1) {
+					if (field.getState().toString() == playerColor.toString()) {
+						myPiranhasAtBorder++;
+					} else {
+						otherPiranhasAtBorder++;
+					}
 				}
 
 				// Die Fischposition bewerten.
-				if (field.getState() == FieldState.RED) {
-					redPiranhasPosition += Constants.boardPosition.get(x).get(y);
+				if (field.getState().toString() == playerColor.toString()) {
+					myPiranhasPosition += evaluatePosition(x, y);
 				} else {
-					bluePiranhasPosition += Constants.boardPosition.get(x).get(y);
+					otherPiranhasPosition += evaluatePosition(x, y);
 				}
 			}
 		}
 
-		redSwarmSize = GameRuleLogic.greatestSwarmSize(board, PlayerColor.RED);
-		blueSwarmSize = GameRuleLogic.greatestSwarmSize(board, PlayerColor.BLUE);
-
-		Set<Field> redSwarm = NewGameRuleLogic.greatestSwarm(board, PlayerColor.RED);
-		Set<Field> blueSwarm = NewGameRuleLogic.greatestSwarm(board, PlayerColor.BLUE);
-		for (Field a : redSwarm) {
-			for (Field b : redSwarm) {
-				int distance = Math.abs(a.getX() - b.getX()) + Math.abs(a.getX() - b.getX());
-				if (distance > redSwarmDistance) {
-					redSwarmDistance = distance;
-				}
-			}
-		}
-		for (Field a : blueSwarm) {
-			for (Field b : blueSwarm) {
-				int distance = Math.abs(a.getX() - b.getX()) + Math.abs(a.getX() - b.getX());
-				if (distance > blueSwarmDistance) {
-					blueSwarmDistance = distance;
-				}
-			}
-		}
-
-		redNoBorderSwarmSize = NewGameRuleLogic.swarmSize(redSwarm);
-		blueNoBorderSwarmSize = NewGameRuleLogic.swarmSize(blueSwarm);
+		// Größter Schwarm
+		myGreatestSwarmSize = GameRuleLogic.greatestSwarmSize(board, playerColor);
+		otherGreatestSwarmSize = GameRuleLogic.greatestSwarmSize(board, playerColor.opponent());
+		myNotInGreatestSwarmPiranhas = myPiranhasCount - myGreatestSwarmSize;
+		otherNotInGreatestSwarmPiranhas = otherPiranhasCount - otherGreatestSwarmSize;
 	}
 
-	public int evaluate(BoardRater boardRaterAtStart, PlayerColor playerColor) {
-		double myNoBorderSwarmSize;
-		double otherNoBorderSwarmSize;
+	public double evaluate() {
+		double result = 0D;
 
-		int myPiranhasPosition;
-		int otherPiranhasPosition;
+		***REMOVED***
+		***REMOVED***
+		***REMOVED***
+		***REMOVED***
+		***REMOVED***
 
-		int myPiranhasCount;
-		int otherPiranhasCount;
+		return result;
+	}
 
-		int mySwarmDistance;
-		int otherSwarmDistance;
-
-		int startOtherPiranhasCount;
-		if (playerColor == PlayerColor.RED) {
-			myNoBorderSwarmSize = redNoBorderSwarmSize;
-			otherNoBorderSwarmSize = blueNoBorderSwarmSize;
-
-			myPiranhasPosition = redPiranhasPosition;
-			otherPiranhasPosition = bluePiranhasPosition;
-
-			myPiranhasCount = redPiranhasCount;
-			otherPiranhasCount = bluePiranhasCount;
-
-			mySwarmDistance = redSwarmDistance;
-			otherSwarmDistance = blueSwarmDistance;
-
-			startOtherPiranhasCount = boardRaterAtStart.bluePiranhasCount;
-		} else {
-			myNoBorderSwarmSize = blueNoBorderSwarmSize;
-			otherNoBorderSwarmSize = redNoBorderSwarmSize;
-
-			myPiranhasPosition = bluePiranhasPosition;
-			otherPiranhasPosition = redPiranhasPosition;
-
-			myPiranhasCount = bluePiranhasCount;
-			otherPiranhasCount = redPiranhasCount;
-
-			mySwarmDistance = blueSwarmDistance;
-			otherSwarmDistance = redSwarmDistance;
-
-			startOtherPiranhasCount = boardRaterAtStart.redPiranhasCount;
-		}
-
+	private int evaluatePosition(int x, int y) {
 		int result = 0;
-
-		if (startOtherPiranhasCount > otherPiranhasCount && Constants.eatUntilPiranhasCount >= otherPiranhasCount) {
-			result -= 10000;
+		if (x >= Constants.BOARD_SIZE / 2) {
+			result += Constants.BOARD_SIZE - 1 - x;
+		} else {
+			result += x;
 		}
-
-		result -= (myPiranhasCount - myNoBorderSwarmSize) * Constants.myNoBorderNotConnectedPiranhasFac;
-		result += (otherPiranhasCount - otherNoBorderSwarmSize) * Constants.otherNoBorderNotConnectedPiranhasFac;
-
-		result += myPiranhasPosition * Constants.myPiranhasPositionFac;
-		result -= otherPiranhasPosition * Constants.otherPiranhasPositionFac;
-
-		result += mySwarmDistance * Constants.mySwarmDistanceFac;
-		result -= otherSwarmDistance * Constants.otherSwarmDistanceFac;
-
+		if (y >= Constants.BOARD_SIZE / 2) {
+			result += Constants.BOARD_SIZE - 1 - y;
+		} else {
+			result += y;
+		}
 		return result;
 	}
 
