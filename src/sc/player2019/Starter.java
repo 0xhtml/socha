@@ -8,42 +8,42 @@ import sc.shared.SharedConfiguration;
 
 public class Starter extends AbstractClient {
 
-	public Starter(String host, int port, String reservation) throws Exception {
-		super(host, port);
+    private Starter(String host, int port, String reservation) throws Exception {
+        super(host, port);
 
-		IGameHandler logic = new AlphaBeta(this);
-		setHandler(logic);
+        IGameHandler logic = new AlphaBeta(this);
+        setHandler(logic);
 
-		if (reservation == null || reservation.isEmpty()) {
-			joinAnyGame();
-		} else {
-			joinPreparedGame(reservation);
-		}
-	}
+        if (reservation == null || reservation.isEmpty()) {
+            joinAnyGame();
+        } else {
+            joinPreparedGame(reservation);
+        }
+    }
 
-	public static void main(String[] args) {
-		System.setProperty("file.encoding", "UTF-8");
+    public static void main(String[] args) {
+        System.setProperty("file.encoding", "UTF-8");
 
-		CmdLineParser parser = new CmdLineParser();
-		CmdLineParser.Option hostOption = parser.addStringOption('h', "host");
-		CmdLineParser.Option portOption = parser.addIntegerOption('p', "port");
-		CmdLineParser.Option reservationOption = parser.addStringOption('r', "reservation");
+        CmdLineParser parser = new CmdLineParser();
+        CmdLineParser.Option hostOption = parser.addStringOption('h', "host");
+        CmdLineParser.Option portOption = parser.addIntegerOption('p', "port");
+        CmdLineParser.Option reservationOption = parser.addStringOption('r', "reservation");
 
-		try {
-			parser.parse(args);
-		} catch (CmdLineParser.OptionException e) {
-			System.exit(2);
-		}
+        try {
+            parser.parse(args);
+        } catch (CmdLineParser.OptionException e) {
+            System.exit(2);
+        }
 
-		String host = (String) parser.getOptionValue(hostOption, "localhost");
-		int port = (Integer) parser.getOptionValue(portOption, SharedConfiguration.DEFAULT_PORT);
-		String reservation = (String) parser.getOptionValue(reservationOption, "");
+        String host = (String) parser.getOptionValue(hostOption, "localhost");
+        int port = (Integer) parser.getOptionValue(portOption, SharedConfiguration.DEFAULT_PORT);
+        String reservation = (String) parser.getOptionValue(reservationOption, "");
 
-		try {
-			new Starter(host, port, reservation);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
+        try {
+            new Starter(host, port, reservation);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 }
