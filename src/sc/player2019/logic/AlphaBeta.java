@@ -14,27 +14,26 @@ import sc.shared.InvalidMoveException;
 import sc.shared.PlayerColor;
 
 import java.util.ArrayList;
+import java.util.concurrent.*;
 
 public class AlphaBeta implements IGameHandler {
 
     private GameState gameState;
     private Move bestMove;
+    private double best;
     private Starter client;
     private int depth = 3;
     private PlayerColor currentPlayer;
 
-    private boolean timeout;
     private long time;
+    private ExecutorService executor;
 
     public AlphaBeta(Starter client) {
         this.client = client;
+        this.executor = Executors.newSingleThreadExecutor();
     }
 
     private double alphaBeta(GameState gameState, int depth, double alpha, double beta) {
-        if (checkTimeout()) {
-            return 0;
-        }
-
         boolean foundPV = false;
         double best = Double.NEGATIVE_INFINITY;
 
@@ -43,34 +42,19 @@ public class AlphaBeta implements IGameHandler {
         }
 
         ArrayList<Move> moves = GameRuleLogic.getPossibleMoves(gameState);
-
         if (moves.size() == 0) {
             return evaluate(gameState, depth);
         }
-
         moves = sortMoves(moves);
-
-        if (checkTimeout()) {
-            return 0;
-        }
 
         for (Move move : moves) {
             try {
                 GameState clonedGameState = gameState.clone();
                 move.perform(clonedGameState);
 
-                if (checkTimeout()) {
-                    return 0;
-                }
-
                 double value;
                 if (foundPV) {
                     value = -alphaBeta(clonedGameState, depth - 1, -alpha - 1, -alpha);
-
-                    if (checkTimeout()) {
-                        return 0;
-                    }
-
                     if (value > alpha && value < beta) {
                         value = -alphaBeta(clonedGameState, depth - 1, -beta, -value);
                     }
@@ -94,9 +78,6 @@ public class AlphaBeta implements IGameHandler {
             } catch (InvalidGameStateException | InvalidMoveException e) {
                 System.out.println("Error!");
                 e.printStackTrace();
-            }
-            if (checkTimeout()) {
-                return 0;
             }
         }
         return best;
@@ -155,29 +136,27 @@ public class AlphaBeta implements IGameHandler {
         return sortedMoves;
     }
 
-    private boolean checkTimeout() {
-        if (timeout) {
-            return true;
-        }
-        if (System.currentTimeMillis() - time >= 1890) {
-            System.out.println("TimeoutTime: " + (System.currentTimeMillis() - time) + "ms");
-            timeout = true;
-            return true;
-        }
-        return false;
-    }
-
     @Override
     public void onRequestAction() {
-        System.out.println("\nStarting calculation.");
-        System.out.println("MyColor: " + currentPlayer.toString());
         time = System.currentTimeMillis();
-        timeout = false;
+        System.out.println("\nStarting calculation");
 
         bestMove = GameRuleLogic.getPossibleMoves(gameState).get(0);
-        double best = alphaBeta(gameState, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-        sendAction(bestMove);
 
+        Future<?> handler = executor.submit(() -> {
+            best = alphaBeta(gameState, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+        });
+
+        try {
+            handler.get(1850, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
+            handler.cancel(true);
+            System.out.println("Timeout!");
+        }
+
+        sendAction(bestMove);
         System.out.println("Evaluation: " + best);
     }
 
@@ -195,7 +174,7 @@ public class AlphaBeta implements IGameHandler {
     @Override
     public void sendAction(Move move) {
         client.sendMove(move);
-        System.out.println("SendActionTime: " + (System.currentTimeMillis() - time) + "ms");
+        System.out.println("Send after " + (System.currentTimeMillis() - time) + "ms");
     }
 
     @Override
