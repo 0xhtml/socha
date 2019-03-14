@@ -10,7 +10,7 @@ import sc.shared.PlayerColor;
 import java.util.HashSet;
 import java.util.Set;
 
-public class BoardRater {
+class BoardRater {
 
     private int turn;
 
@@ -29,7 +29,7 @@ public class BoardRater {
     private int ownNotInGreatestSwarmPiranhas;
     private int oppNotInGreatestSwarmPiranhas;
 
-    public BoardRater(Board board, PlayerColor playerColor, int turn) {
+    BoardRater(Board board, PlayerColor playerColor, int turn) {
         this.turn = turn;
 
         Set<Field> ownPiranhas = new HashSet<>();
@@ -71,7 +71,7 @@ public class BoardRater {
         oppNotInGreatestSwarmPiranhas = oppPiranhasCount - oppGreatestSwarmSize;
     }
 
-    public double evaluate() {
+    double evaluate() {
         double result = 0D;
 
         ***REMOVED***
