@@ -82,4 +82,71 @@ class PerformanceGameRuleLogic {
         return fields;
     }
 
+    private static Set<Field> getDirectNeighbour(Board board, Field field) {
+        Set<Field> neighbours = new HashSet<>();
+        int x = field.getX();
+        int y = field.getY();
+        FieldState state = field.getState();
+
+        for (int neighbourXOffset = -1; neighbourXOffset <= 1; neighbourXOffset++) {
+            for (int neighbourYOffset = -1; neighbourYOffset <= 1; neighbourYOffset++) {
+                if (neighbourXOffset == 0 && neighbourYOffset == 0) {
+                    continue;
+                }
+                int neighbourX = x + neighbourXOffset;
+                int neighbourY = y + neighbourYOffset;
+                if (neighbourX < 0 || neighbourX >= Constants.BOARD_SIZE || neighbourY < 0 || neighbourY >= Constants.BOARD_SIZE) {
+                    continue;
+                }
+
+                Field neighbourField = board.getField(neighbourX, neighbourY);
+                if (neighbourField.getState().equals(state)) {
+                    neighbours.add(neighbourField);
+                }
+            }
+        }
+
+        return neighbours;
+    }
+
+    private static Set<Field> getSwarm(Board board, Set<Field> fields) {
+        Set<Field> checkedSwarm = new HashSet<>();
+        Set<Field> uncheckedSwarm = new HashSet<>();
+
+        if (!fields.isEmpty()) {
+            Field field = fields.iterator().next();
+            uncheckedSwarm.add(field);
+            fields.remove(field);
+        }
+
+        while (uncheckedSwarm.size() > 0) {
+            Set<Field> newSwarm = new HashSet<>();
+            for (Field field : uncheckedSwarm) {
+                Set<Field> neighbours = getDirectNeighbour(board, field);
+                newSwarm.addAll(neighbours);
+            }
+            newSwarm.removeAll(checkedSwarm);
+            checkedSwarm.addAll(uncheckedSwarm);
+            uncheckedSwarm.clear();
+            uncheckedSwarm.addAll(newSwarm);
+        }
+
+        fields.removeAll(checkedSwarm);
+        return checkedSwarm;
+    }
+
+    static int greatestSwarmSize(Board board, Set<Field> fields) {
+        int maxSize = -1;
+
+        while (!fields.isEmpty() && fields.size() > maxSize) {
+            Set<Field> swarm = getSwarm(board, fields);
+            int size = swarm.size();
+            if (maxSize < size) {
+                maxSize = size;
+            }
+        }
+
+        return maxSize;
+    }
+
 }

@@ -4,7 +4,6 @@ import sc.plugin2019.Board;
 import sc.plugin2019.Field;
 import sc.plugin2019.FieldState;
 import sc.plugin2019.util.Constants;
-import sc.plugin2019.util.GameRuleLogic;
 import sc.shared.PlayerColor;
 
 import java.util.HashSet;
@@ -64,8 +63,8 @@ class BoardRater {
         ownPiranhasCount = ownPiranhas.size();
         oppPiranhasCount = oppPiranhas.size();
 
-        ownGreatestSwarmSize = GameRuleLogic.greatestSwarmSize(board, ownPiranhas);
-        oppGreatestSwarmSize = GameRuleLogic.greatestSwarmSize(board, oppPiranhas);
+        ownGreatestSwarmSize = PerformanceGameRuleLogic.greatestSwarmSize(board, ownPiranhas);
+        oppGreatestSwarmSize = PerformanceGameRuleLogic.greatestSwarmSize(board, oppPiranhas);
 
         ownNotInGreatestSwarmPiranhas = ownPiranhasCount - ownGreatestSwarmSize;
         oppNotInGreatestSwarmPiranhas = oppPiranhasCount - oppGreatestSwarmSize;
