@@ -1,4 +1,4 @@
-/*package sc.player2019.logic;
+package sc.player2019.logic;
 
 import sc.plugin2019.*;
 import sc.plugin2019.util.Constants;
@@ -149,4 +149,4 @@ class PerformanceGameRuleLogic {
         return maxSize;
     }
 
-}*/
+}
