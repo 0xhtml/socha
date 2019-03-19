@@ -7,6 +7,7 @@ import sc.plugin2019.GameState;
 import sc.plugin2019.IGameHandler;
 import sc.plugin2019.Move;
 import sc.plugin2019.util.Constants;
+import sc.plugin2019.util.GameRuleLogic;
 import sc.shared.GameResult;
 import sc.shared.InvalidGameStateException;
 import sc.shared.InvalidMoveException;
@@ -39,7 +40,7 @@ public class AlphaBeta implements IGameHandler {
             return evaluate(gameState, depth);
         }
 
-        ArrayList<Move> moves = PerformanceGameRuleLogic.getPossibleMoves(gameState);
+        ArrayList<Move> moves = GameRuleLogic.getPossibleMoves(gameState);
         if (moves.size() == 0) {
             return evaluate(gameState, depth);
         }
@@ -94,7 +95,7 @@ public class AlphaBeta implements IGameHandler {
         if (gameState.getTurn() >= Constants.ROUND_LIMIT * 2) {
             return true;
         }
-        return PerformanceGameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getCurrentPlayerColor()) || PerformanceGameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getOtherPlayerColor());
+        return GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getCurrentPlayerColor()) || GameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getOtherPlayerColor());
     }
 
     private ArrayList<Move> sortMoves(ArrayList<Move> moves) {
@@ -139,7 +140,7 @@ public class AlphaBeta implements IGameHandler {
         time = System.currentTimeMillis();
         System.out.println("\nStarting calculation");
 
-        bestMove = PerformanceGameRuleLogic.getPossibleMoves(gameState).get(0);
+        bestMove = GameRuleLogic.getPossibleMoves(gameState).get(0);
 
         ExecutorService executor = Executors.newSingleThreadExecutor();
         Future<?> handler = executor.submit(() -> {
