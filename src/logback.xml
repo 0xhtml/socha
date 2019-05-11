@@ -6,9 +6,7 @@
 		</layout>
 	</appender>
 
-	<!-- INFO kann durch DEBUG für detaillierte Debug-Ausgaben ersetzt werden,
-		oder durch WARN für minimale Ausgaben -->
-	<logger name="sc" level="INFO" />
+	<logger name="sc" level="WARN" />
 
 	<root level="WARN">
 		<appender-ref ref="STDOUT" />
