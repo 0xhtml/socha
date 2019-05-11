@@ -1,8 +1,0 @@
-<<<<<<< HEAD
-Manifest-Version: 1.0
-Main-Class: sc.player2019.Starter
-
-=======
-Manifest-Version: 1.0
-Main-Class: sc.player2019.Starter
->>>>>>> parent of 98de3e1... Updated MANIFEST.MF
