@@ -1,13 +1,12 @@
 package sc.player2019.logic;
 
-import sc.plugin2019.Board;
-import sc.plugin2019.Field;
-import sc.plugin2019.FieldState;
-import sc.plugin2019.util.Constants;
-import sc.shared.PlayerColor;
-
 import java.util.HashSet;
 import java.util.Set;
+
+import sc.plugin2019.Board;
+import sc.plugin2019.Field;
+import sc.plugin2019.util.Constants;
+import sc.shared.PlayerColor;
 
 class BoardRater {
 
@@ -38,11 +37,11 @@ class BoardRater {
             for (int y = 0; y < Constants.BOARD_SIZE; y++) {
                 Field field = board.getField(x, y);
 
-                if (field.getState() != FieldState.RED && field.getState() != FieldState.BLUE) {
+                if (!field.getPiranha().isPresent()) {
                     continue;
                 }
 
-                if (field.getState().toString().equals(playerColor.toString())) {
+                if (field.getPiranha().get().equals(playerColor)) {
                     ownPiranhas.add(field);
                     ownPiranhasPosition += evaluatePosition(x, y);
                 } else {
@@ -51,7 +50,7 @@ class BoardRater {
                 }
 
                 if (x == 0 || x == Constants.BOARD_SIZE - 1 || y == 0 || y == Constants.BOARD_SIZE - 1) {
-                    if (field.getState().toString().equals(playerColor.toString())) {
+                    if (field.getPiranha().get().equals(playerColor)) {
                         ownPiranhasAtBorder++;
                     } else {
                         oppPiranhasAtBorder++;

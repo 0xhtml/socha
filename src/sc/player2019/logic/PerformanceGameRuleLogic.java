@@ -42,24 +42,27 @@ class PerformanceGameRuleLogic {
             if (i == distance) {
                 continue;
             }
-            if (fieldsInDirection.get(i).getState().toString().equals(gameState.getOtherPlayerColor().toString())) {
+            if (fieldsInDirection.get(i).getPiranha().isPresent() && fieldsInDirection.get(i).getPiranha().get().equals(gameState.getOtherPlayerColor())) {
                 return false;
             }
         }
 
-        String fieldState = fieldsInDirection.get(distance).getState().toString();
-        if (fieldState.equals(gameState.getCurrentPlayerColor().toString())) {
+        Field field = fieldsInDirection.get(distance);
+        if (field.getPiranha().isPresent() && field.getPiranha().get().equals(gameState.getCurrentPlayerColor())) {
             return false;
         }
-        return !fieldState.equals("OBSTRUCTED");
+        if (field.isObstructed()) {
+        	return false;
+        }
+        return true;
     }
 
-    private static Set<Field> getOwnFields(Board board, PlayerColor player) {
+    private static Set<Field> getOwnFields(Board board, PlayerColor playerColor) {
         Set<Field> fields = new HashSet<>();
         for (int x = 0; x < Constants.BOARD_SIZE; x++) {
             for (int y = 0; y < Constants.BOARD_SIZE; y++) {
                 Field field = board.getField(x, y);
-                if (field.getState().toString().equals(player.toString())) {
+                if (field.getPiranha().isPresent() && field.getPiranha().get().equals(playerColor)) {
                     fields.add(field);
                 }
             }

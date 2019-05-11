@@ -28,7 +28,7 @@ public class AlphaBeta implements IGameHandler {
 
     public AlphaBeta(Starter client) {
         this.client = client;
-        System.out.println("v1.4");
+        System.out.println("v1.5");
     }
 
     private double alphaBeta(GameState gameState, int depth, double alpha, double beta) {
