@@ -137,7 +137,7 @@ public class AlphaBeta implements IGameHandler {
     @Override
     public void onRequestAction() {
         time = System.currentTimeMillis();
-        System.out.println("\nStarting calculation");
+        System.out.println("\nStarting calculation for " + currentPlayer);
 
         bestMove = PerformanceGameRuleLogic.getPossibleMoves(gameState).get(0);
 

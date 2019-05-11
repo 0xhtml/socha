@@ -76,7 +76,11 @@ class BoardRater {
         ***REMOVED***
         ***REMOVED***
         ***REMOVED***
-        ***REMOVED***
+        if (turn < 45) {
+        	***REMOVED***
+        } else {
+        	***REMOVED***
+        }
         ***REMOVED***
 
         return result;
