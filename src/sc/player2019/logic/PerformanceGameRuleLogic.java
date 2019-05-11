@@ -12,7 +12,7 @@ class PerformanceGameRuleLogic {
 
     static ArrayList<Move> getPossibleMoves(GameState state) {
         ArrayList<Move> possibleMoves = new ArrayList<>();
-        Collection<Field> fields = getOwnFields(state.getBoard(), state.getCurrentPlayerColor());
+        Collection<Field> fields = GameRuleLogic.getOwnFields(state.getBoard(), state.getCurrentPlayerColor());
         for (Field field : fields) {
             int x = field.getX();
             int y = field.getY();
@@ -57,21 +57,8 @@ class PerformanceGameRuleLogic {
         return true;
     }
 
-    private static Set<Field> getOwnFields(Board board, PlayerColor playerColor) {
-        Set<Field> fields = new HashSet<>();
-        for (int x = 0; x < Constants.BOARD_SIZE; x++) {
-            for (int y = 0; y < Constants.BOARD_SIZE; y++) {
-                Field field = board.getField(x, y);
-                if (field.getPiranha().isPresent() && field.getPiranha().get().equals(playerColor)) {
-                    fields.add(field);
-                }
-            }
-        }
-        return fields;
-    }
-
     static boolean isSwarmConnected(Board board, PlayerColor player) {
-        Set<Field> fields = getOwnFields(board, player);
+        Set<Field> fields = GameRuleLogic.getOwnFields(board, player);
         int greatestSwarmSize = GameRuleLogic.greatestSwarmSize(board, fields);
         return greatestSwarmSize == fields.size();
     }
