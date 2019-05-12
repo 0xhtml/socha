@@ -139,25 +139,31 @@ public class AlphaBeta implements IGameHandler {
         time = System.currentTimeMillis();
         System.out.println("\nStarting calculation for " + currentPlayer);
 
-        bestMove = PerformanceGameRuleLogic.getPossibleMoves(gameState).get(0);
+        ArrayList<Move> possibelMoves = PerformanceGameRuleLogic.getPossibleMoves(gameState);
+        bestMove = possibelMoves.get(0);
 
-        ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<?> handler = executor.submit(() -> {
-            best = alphaBeta(gameState, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-        });
-
-        try {
-            handler.get(1850, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        } catch (TimeoutException e) {
-            handler.cancel(true);
-            System.out.println("Timeout!");
+        if (gameState.getTurn() == 0 && possibelMoves.contains(new Move(9, 2, Direction.DOWN_LEFT))) {
+        	bestMove = new Move(9, 2, Direction.DOWN_LEFT);
+        } else {
+	        ExecutorService executor = Executors.newSingleThreadExecutor();
+	        Future<?> handler = executor.submit(() -> {
+	            best = alphaBeta(gameState, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+	        });
+	        
+	        try {
+	            handler.get(1850, TimeUnit.MILLISECONDS);
+	        } catch (InterruptedException | ExecutionException e) {
+	            e.printStackTrace();
+	        } catch (TimeoutException e) {
+	            handler.cancel(true);
+	            System.out.println("Timeout!");
+	        }
+	        
+	        executor.shutdownNow();
         }
 
         sendAction(bestMove);
         System.out.println("Evaluation: " + best);
-        executor.shutdownNow();
     }
 
     @Override

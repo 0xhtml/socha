@@ -75,7 +75,7 @@ class BoardRater {
         ***REMOVED***
         ***REMOVED***
         ***REMOVED***
-        if (turn < 45) {
+        if (turn < 40) {
         	***REMOVED***
         } else {
         	***REMOVED***
