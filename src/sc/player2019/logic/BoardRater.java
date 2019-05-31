@@ -24,9 +24,6 @@ class BoardRater {
     private int ownGreatestSwarmSize;
     private int oppGreatestSwarmSize;
 
-    private int ownNotInGreatestSwarmPiranhas;
-    private int oppNotInGreatestSwarmPiranhas;
-
     BoardRater(Board board, PlayerColor playerColor, int turn) {
         this.turn = turn;
 
@@ -64,9 +61,6 @@ class BoardRater {
 
         ownGreatestSwarmSize = PerformanceGameRuleLogic.greatestSwarmSize(board, ownPiranhas);
         oppGreatestSwarmSize = PerformanceGameRuleLogic.greatestSwarmSize(board, oppPiranhas);
-
-        ownNotInGreatestSwarmPiranhas = ownPiranhasCount - ownGreatestSwarmSize;
-        oppNotInGreatestSwarmPiranhas = oppPiranhasCount - oppGreatestSwarmSize;
     }
 
     double evaluate() {
@@ -80,7 +74,6 @@ class BoardRater {
         } else {
         	***REMOVED***
         }
-        ***REMOVED***
 
         return result;
     }
