@@ -1,5 +1,13 @@
 package sc.player2019.logic;
 
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import sc.framework.plugins.Player;
 import sc.player2019.Starter;
 import sc.plugin2019.Direction;
@@ -11,9 +19,6 @@ import sc.shared.GameResult;
 import sc.shared.InvalidGameStateException;
 import sc.shared.InvalidMoveException;
 import sc.shared.PlayerColor;
-
-import java.util.ArrayList;
-import java.util.concurrent.*;
 
 public class AlphaBeta implements IGameHandler {
 
@@ -28,7 +33,7 @@ public class AlphaBeta implements IGameHandler {
 
     public AlphaBeta(Starter client) {
         this.client = client;
-        System.out.println("v1.6");
+        System.out.println("v1.7");
     }
 
     private double alphaBeta(GameState gameState, int depth, double alpha, double beta) {
@@ -91,10 +96,15 @@ public class AlphaBeta implements IGameHandler {
     }
 
     private boolean endOfGame(GameState gameState) {
-        if (gameState.getTurn() >= Constants.ROUND_LIMIT * 2) {
-            return true;
-        }
-        return PerformanceGameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getCurrentPlayerColor()) || PerformanceGameRuleLogic.isSwarmConnected(gameState.getBoard(), gameState.getOtherPlayerColor());
+    	if (gameState.getTurn() >= Constants.ROUND_LIMIT * 2) {
+    		return true;
+    	}
+    	if (gameState.getTurn() % 2 == 0) {
+    		if (PerformanceGameRuleLogic.isSwarmConnected(gameState.getBoard(), PlayerColor.RED) || PerformanceGameRuleLogic.isSwarmConnected(gameState.getBoard(), PlayerColor.BLUE)) {
+    			return true;
+    		}
+    	}
+    	return false;
     }
 
     private ArrayList<Move> sortMoves(ArrayList<Move> moves) {
