@@ -5,7 +5,6 @@ import sc.plugin2019.util.Constants;
 import sc.plugin2019.util.GameRuleLogic;
 import sc.plugin2019.util.Point;
 import sc.shared.PlayerColor;
-
 import java.util.*;
 
 class PerformanceGameRuleLogic {
@@ -52,7 +51,7 @@ class PerformanceGameRuleLogic {
             return false;
         }
         if (field.isObstructed()) {
-        	return false;
+            return false;
         }
         return true;
     }

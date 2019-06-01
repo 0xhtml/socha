@@ -2,7 +2,6 @@ package sc.player2019.logic;
 
 import java.util.HashSet;
 import java.util.Set;
-
 import sc.plugin2019.Board;
 import sc.plugin2019.Field;
 import sc.plugin2019.util.Constants;
@@ -70,9 +69,9 @@ class BoardRater {
         ***REMOVED***
         ***REMOVED***
         if (turn < 40) {
-        	***REMOVED***
+            ***REMOVED***
         } else {
-        	***REMOVED***
+            ***REMOVED***
         }
 
         return result;

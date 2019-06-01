@@ -7,7 +7,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-
 import sc.framework.plugins.Player;
 import sc.player2019.Starter;
 import sc.plugin2019.Direction;
@@ -96,15 +95,15 @@ public class AlphaBeta implements IGameHandler {
     }
 
     private boolean endOfGame(GameState gameState) {
-    	if (gameState.getTurn() >= Constants.ROUND_LIMIT * 2) {
-    		return true;
-    	}
-    	if (gameState.getTurn() % 2 == 0) {
-    		if (PerformanceGameRuleLogic.isSwarmConnected(gameState.getBoard(), PlayerColor.RED) || PerformanceGameRuleLogic.isSwarmConnected(gameState.getBoard(), PlayerColor.BLUE)) {
-    			return true;
-    		}
-    	}
-    	return false;
+        if (gameState.getTurn() >= Constants.ROUND_LIMIT * 2) {
+            return true;
+        }
+        if (gameState.getTurn() % 2 == 0) {
+            if (PerformanceGameRuleLogic.isSwarmConnected(gameState.getBoard(), PlayerColor.RED) || PerformanceGameRuleLogic.isSwarmConnected(gameState.getBoard(), PlayerColor.BLUE)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private ArrayList<Move> sortMoves(ArrayList<Move> moves) {
@@ -153,23 +152,23 @@ public class AlphaBeta implements IGameHandler {
         bestMove = possibelMoves.get(0);
 
         if (gameState.getTurn() == 0 && possibelMoves.contains(new Move(9, 2, Direction.DOWN_LEFT))) {
-        	bestMove = new Move(9, 2, Direction.DOWN_LEFT);
+            bestMove = new Move(9, 2, Direction.DOWN_LEFT);
         } else {
-	        ExecutorService executor = Executors.newSingleThreadExecutor();
-	        Future<?> handler = executor.submit(() -> {
-	            best = alphaBeta(gameState, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-	        });
-	        
-	        try {
-	            handler.get(1850, TimeUnit.MILLISECONDS);
-	        } catch (InterruptedException | ExecutionException e) {
-	            e.printStackTrace();
-	        } catch (TimeoutException e) {
-	            handler.cancel(true);
-	            System.out.println("Timeout!");
-	        }
-	        
-	        executor.shutdownNow();
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            Future<?> handler = executor.submit(() -> {
+                best = alphaBeta(gameState, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+            });
+
+            try {
+                handler.get(1850, TimeUnit.MILLISECONDS);
+            } catch (InterruptedException | ExecutionException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                handler.cancel(true);
+                System.out.println("Timeout!");
+            }
+
+            executor.shutdownNow();
         }
 
         sendAction(bestMove);
