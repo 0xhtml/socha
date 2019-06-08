@@ -29,10 +29,12 @@ public class AlphaBeta implements IGameHandler {
     private PlayerColor currentPlayer;
 
     private long time;
+    ExecutorService executor;
 
     public AlphaBeta(Starter client) {
         this.client = client;
-        System.out.println("v1.7");
+        executor = Executors.newSingleThreadExecutor();
+        System.out.println("v1.8");
     }
 
     private double alphaBeta(GameState gameState, int depth, double alpha, double beta) {
@@ -149,12 +151,12 @@ public class AlphaBeta implements IGameHandler {
         System.out.println("\nStarting calculation for " + currentPlayer);
 
         ArrayList<Move> possibelMoves = PerformanceGameRuleLogic.getPossibleMoves(gameState);
-        bestMove = possibelMoves.get(0);
 
         if (gameState.getTurn() == 0 && possibelMoves.contains(new Move(9, 2, Direction.DOWN_LEFT))) {
             bestMove = new Move(9, 2, Direction.DOWN_LEFT);
         } else {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
+            bestMove = possibelMoves.get(0);
+
             Future<?> handler = executor.submit(() -> {
                 best = alphaBeta(gameState, depth, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
             });
@@ -164,11 +166,9 @@ public class AlphaBeta implements IGameHandler {
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             } catch (TimeoutException e) {
-                handler.cancel(true);
                 System.out.println("Timeout!");
+                handler.cancel(true);
             }
-
-            executor.shutdownNow();
         }
 
         sendAction(bestMove);
@@ -197,6 +197,6 @@ public class AlphaBeta implements IGameHandler {
         System.out.println("\nGame ended.");
         System.out.println(gameResult.toString());
         System.out.println(errorMessage);
+        executor.shutdownNow();
     }
-
 }
