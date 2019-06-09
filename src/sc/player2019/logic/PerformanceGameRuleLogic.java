@@ -9,30 +9,53 @@ import java.util.*;
 
 class PerformanceGameRuleLogic {
 
+    private static final Direction[] DIRECTIONS = {Direction.LEFT, Direction.UP, Direction.UP_RIGHT, Direction.DOWN_RIGHT};
+
     static ArrayList<Move> getPossibleMoves(GameState state) {
         ArrayList<Move> possibleMoves = new ArrayList<>();
-        Collection<Field> fields = GameRuleLogic.getOwnFields(state.getBoard(), state.getCurrentPlayerColor());
+        Set<Field> fields = GameRuleLogic.getOwnFields(state.getBoard(), state.getCurrentPlayerColor());
         for (Field field : fields) {
             int x = field.getX();
             int y = field.getY();
-            for (Direction direction : Direction.values()) {
-                if (isValidToMove(state, x, y, direction)) {
-                    Move m = new Move(x, y, direction);
-                    possibleMoves.add(m);
+            for (Direction direction : DIRECTIONS) {
+                int distance = GameRuleLogic.calculateMoveDistance(state.getBoard(), x, y, direction);
+                if (isValidToMove(state, x, y, direction, distance)) {
+                    possibleMoves.add(new Move(x, y, direction));
+                }
+                if (isValidToMove(state, x, y, oppositeDirection(direction), distance)) {
+                    possibleMoves.add(new Move(x, y, oppositeDirection(direction)));
                 }
             }
         }
         return possibleMoves;
     }
 
-    private static boolean isValidToMove(GameState gameState, int x, int y, Direction direction) {
-        Board board = gameState.getBoard();
+    private static Direction oppositeDirection(Direction direction) {
+        switch (direction) {
+            case LEFT:
+                return Direction.RIGHT;
+            case RIGHT:
+                return Direction.LEFT;
+            case UP:
+                return Direction.DOWN;
+            case DOWN:
+                return Direction.UP;
+            case UP_RIGHT:
+                return Direction.DOWN_LEFT;
+            case DOWN_LEFT:
+                return Direction.UP_RIGHT;
+            case DOWN_RIGHT:
+                return Direction.UP_LEFT;
+            case UP_LEFT:
+                return Direction.DOWN_RIGHT;
+        }
+        return null;
+    }
 
-        int distance = GameRuleLogic.calculateMoveDistance(board, x, y, direction);
-
+    private static boolean isValidToMove(GameState gameState, int x, int y, Direction direction, int distance) {
         List<Field> fieldsInDirection;
         try {
-            fieldsInDirection = getFieldsInDirection(board, x, y, direction, distance);
+            fieldsInDirection = getFieldsInDirection(gameState.getBoard(), x, y, direction, distance);
         } catch (ArrayIndexOutOfBoundsException e) {
             return false;
         }
